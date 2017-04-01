@@ -4,8 +4,7 @@ import brightsocket from 'brightsocket.io';
 import attachMiddlewares from './server-middlewares';
 import attachRoutes from './server-routes';
 import attachReload from './server-browser-reload';
-
-const isProd = process.env.NODE_ENV === 'production';
+import config from '../config';
 
 let app, server, socketServer;
 
@@ -15,7 +14,7 @@ export function startServer() {
   socketServer = brightsocket(server);
   attachMiddlewares(app);
   attachRoutes(app);
-  !isProd && attachReload(app);
+  !config.isProduction && attachReload(app);
   server.listen(8080);
 }
 

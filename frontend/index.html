@@ -20,7 +20,10 @@
     <![endif]-->
 
     <!-- Add your site or application content here -->
-    <p>Hello world!</p>
+    <section>
+      kitties are da bestest animals yeah
+    </section>
+
 
     <script src="./js/app.js"></script>
 
@@ -28,20 +31,33 @@
     <script>
       (function () {
         var interval;
-        function ajax() {
+        var needsReload = false;
+        function ajax(to, onload) {
           var xhr = new XMLHttpRequest();
-          xhr.addEventListener('load', function () {
-            if (this.status === 200) {
-              if (JSON.parse(this.responseText).needsReload) {
-                clearInterval(interval);
-                location.reload();
-              }
-            }
-          });
-          xhr.open('GET', location.protocol + '//' + location.host + '/einlandr-reload');
+          xhr.addEventListener('load', onload);
+          xhr.open('GET', to);
           xhr.send();
         }
-        interval = setInterval(ajax, 3000);
+        function ajaxCycle() {
+          ajax(
+            location.protocol + '//' + location.host + '/einlandr-reload',
+            function () {
+              if (this.status === 200) {
+                if (needsReload || JSON.parse(this.responseText).needsReload) {
+                  needsReload = true;
+                  ajax(location.href, function () {
+                    if (this.status === 200) {
+                      needsReload = false;
+                      clearInterval(interval);
+                      location.reload();
+                    }
+                  });
+                }
+              }
+            }
+          );
+        }
+        interval = setInterval(ajaxCycle, 3000);
       }());
     </script>
   

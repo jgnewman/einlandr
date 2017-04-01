@@ -4,43 +4,34 @@ import clean from 'gulp-clean';
 import sass from 'gulp-sass';
 import cleanCSS from 'gulp-clean-css';
 import sourcemaps from 'gulp-sourcemaps';
-
-const isProd = process.env.NODE_ENV === 'production';
+import gulpif from 'gulp-if';
+import config from '../config';
 
 /**
  * Remove old files
  */
 gulp.task('scss:clean', () => {
-  return gulp.src('./frontend/css').pipe(clean({ read: false }));
+  return gulp.src(config.frontend.scssDest).pipe(clean({ read: false }));
 });
 
 /**
  * Compile all style files
  */
 gulp.task('scss:compile', ['scss:clean'], () => {
-  if (isProd) {
-    return gulp.src('./frontend/src/scss/index.scss')
-               .pipe(sass())
-               .pipe(cleanCSS())
-               .pipe(gulp.dest('./frontend/css'));
+  const stream = gulp.src(config.frontend.scssEntry)
+                   .pipe(sass())
+                   .pipe(gulpif(config.isProduction, cleanCSS(), sourcemaps.write()))
+                   .pipe(gulp.dest(config.frontend.scssDest));
 
-  } else {
-    return gulp.src('./frontend/src/scss/index.scss')
-               .pipe(sass())
-               .pipe(sourcemaps.write())
-               .pipe(gulp.dest('./frontend/css'));
-
-  }
+   stream.on('end', config.actions.prepReload);
+   return stream;
 });
 
 /**
  * Watch and recompile files
  */
 gulp.task('scss:watch', ['scss:compile'], () => {
-  const watch = gulp.watch(
-    ['./frontend/src/scss/**/*.js'],
-    ['scss:compile']
-  );
+  const watch = gulp.watch([config.frontend.scssSource], ['scss:compile']);
   watch.on('change', event => {
     log(colors.yellow('Style change'), "'" + colors.cyan(event.path) + "'");
   });

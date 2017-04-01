@@ -1,6 +1,7 @@
 import gulp from 'gulp';
 import { log, colors } from 'gulp-util';
 import { startServer, refreshServer } from '../backend/server-init';
+import config from '../config';
 
 /**
  * Stop and restart the server
@@ -21,15 +22,8 @@ gulp.task('server:start', next => {
 /**
  * Watch files and restart when they change
  */
-gulp.task('server:watch', () => {
-  const watch = gulp.watch(
-    [
-      './*', // top level files
-      './tasks/**/*', // tasks
-      './backend/**/*' // backend files
-    ],
-    ['server:refresh']
-  );
+gulp.task('server:watch', () => { 
+  const watch = gulp.watch(config.backend.serverSource, ['server:refresh']);
   watch.on('change', event => {
     log(colors.yellow('Server file change'), "'" + colors.cyan(event.path) + "'");
   });

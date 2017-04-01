@@ -2,28 +2,41 @@ import gulp from 'gulp';
 import { log, colors } from 'gulp-util';
 import clean from 'gulp-clean';
 import mustache from 'gulp-mustache';
+import config from '../config';
 
-const isProd = process.env.NODE_ENV === 'production';
 
 function generateReloadCode() {
-  return isProd ? '' : `
+  return config.isProduction ? '' : `
     <script>
       (function () {
         var interval;
-        function ajax() {
+        var needsReload = false;
+        function ajax(to, onload) {
           var xhr = new XMLHttpRequest();
-          xhr.addEventListener('load', function () {
-            if (this.status === 200) {
-              if (JSON.parse(this.responseText).needsReload) {
-                clearInterval(interval);
-                location.reload();
-              }
-            }
-          });
-          xhr.open('GET', location.protocol + '//' + location.host + '/einlandr-reload');
+          xhr.addEventListener('load', onload);
+          xhr.open('GET', to);
           xhr.send();
         }
-        interval = setInterval(ajax, 3000);
+        function ajaxCycle() {
+          ajax(
+            location.protocol + '//' + location.host + '/einlandr-reload',
+            function () {
+              if (this.status === 200) {
+                if (needsReload || JSON.parse(this.responseText).needsReload) {
+                  needsReload = true;
+                  ajax(location.href, function () {
+                    if (this.status === 200) {
+                      needsReload = false;
+                      clearInterval(interval);
+                      location.reload();
+                    }
+                  });
+                }
+              }
+            }
+          );
+        }
+        interval = setInterval(ajaxCycle, 3000);
       }());
     </script>
   `;
@@ -33,26 +46,26 @@ function generateReloadCode() {
  * Remove old files
  */
 gulp.task('templates:clean', () => {
-  return gulp.src('./frontend/index.html').pipe(clean({ read: false }));
+  return gulp.src(config.frontend.templateCompiled).pipe(clean({ read: false }));
 });
 
 /**
  * Compile all template files
  */
 gulp.task('templates:compile', ['templates:clean'], () => {
-  return gulp.src('./frontend/src/templates/index.html')
-             .pipe(mustache({ reload: generateReloadCode() }))
-             .pipe(gulp.dest('./frontend'));
+  const stream = gulp.src(config.frontend.templateEntry)
+                     .pipe(mustache({ reload: generateReloadCode() }))
+                     .pipe(gulp.dest(config.frontend.templateDest));
+
+  stream.on('end', config.actions.prepReload);
+  return stream;
 });
 
 /**
  * Watch and recompile files
  */
 gulp.task('templates:watch', ['templates:compile'], () => {
-  const watch = gulp.watch(
-    ['./frontend/src/templates/**/*'],
-    ['templates:compile']
-  );
+  const watch = gulp.watch([config.frontend.templateSource], ['templates:compile']);
   watch.on('change', event => {
     log(colors.yellow('Template change'), "'" + colors.cyan(event.path) + "'");
   });
