@@ -7,10 +7,15 @@
   - [ ] Actions
   - [ ] Data
   - [ ] Localstorage persistence
+- [x] add bodyparser to express routes
 - [ ] Websocket setup
 - [ ] Authentication
 - [ ] DB setup
 - [ ] useful scss
 - [ ] automate adding a new app layer
-- [ ] Browser refresh for dev env
+- [x] Browser refresh for dev env
+- [ ] Move hardcoded gulp locations to config
 - [ ] Write rest of readme
+  - [ ] Mention uses yarn
+  - [ ] Explain yarn commands
+  - [ ] Explain all features

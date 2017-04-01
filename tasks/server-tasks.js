@@ -26,7 +26,7 @@ gulp.task('server:watch', () => {
     [
       './*', // top level files
       './tasks/**/*', // tasks
-      './src/backend/**/*' // backend files
+      './backend/**/*' // backend files
     ],
     ['server:refresh']
   );

@@ -6,5 +6,27 @@
   </head>
   <body>
     Hello, world!
+
+    
+    <script>
+      (function () {
+        var interval;
+        function ajax() {
+          var xhr = new XMLHttpRequest();
+          xhr.addEventListener('load', function () {
+            if (this.status === 200) {
+              if (JSON.parse(this.responseText).needsReload) {
+                clearInterval(interval);
+                location.reload();
+              }
+            }
+          });
+          xhr.open('GET', location.protocol + '//' + location.host + '/einlandr-reload');
+          xhr.send();
+        }
+        interval = setInterval(ajax, 3000);
+      }());
+    </script>
+  
   </body>
 </html>

@@ -43,6 +43,7 @@ jspm_packages
 # Application build
 frontend/css/*
 frontend/js/*
+frontend/index.html
 
 # Environment variables
 env-dev
