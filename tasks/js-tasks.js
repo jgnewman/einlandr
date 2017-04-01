@@ -1,5 +1,5 @@
 import gulp from 'gulp';
-import { log } from 'gulp-util';
+import { log, colors } from 'gulp-util';
 import clean from 'gulp-clean';
 import browserify from 'browserify';
 import babelify from 'babelify';

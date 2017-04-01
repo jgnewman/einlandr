@@ -14,8 +14,28 @@ export default function attachMiddlewares(app) {
   /**
    * Serve static assets
    */
-  app.use('/assets', express.static(
-    path.resolve(__dirname, '../', 'frontend', 'assets')
+  app.use('/css', express.static(
+    path.resolve(__dirname, '../', 'frontend', 'css')
+  ));
+
+  app.use('/js', express.static(
+    path.resolve(__dirname, '../', 'frontend', 'js')
+  ));
+
+  app.use('/fonts', express.static(
+    path.resolve(__dirname, '../', 'frontend', 'fonts')
+  ));
+
+  app.use('/img', express.static(
+    path.resolve(__dirname, '../', 'frontend', 'img')
+  ));
+
+  app.use('/favicon.ico', express.static(
+    path.resolve(__dirname, '../', 'frontend', 'favicon.ico')
+  ));
+
+  app.use('/apple-touch-icon.png', express.static(
+    path.resolve(__dirname, '../', 'frontend', 'apple-touch-icon.png')
   ));
 
   /**
@@ -25,11 +45,5 @@ export default function attachMiddlewares(app) {
     path.resolve(__dirname, '../', 'frontend', 'app')
   ));
 
-  /**
-   * Serve the favicon from its standard location
-   */
-  app.use('/favicon.ico', express.static(
-    path.resolve(__dirname, '../', 'frontend', 'favicon.ico')
-  ));
 
 }

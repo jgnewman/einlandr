@@ -14,6 +14,7 @@
 - [ ] useful scss
 - [ ] automate adding a new app layer
 - [x] Browser refresh for dev env
+- [x] add nice index file stuff
 - [ ] Move hardcoded gulp locations to config
 - [ ] Write rest of readme
   - [ ] Mention uses yarn
