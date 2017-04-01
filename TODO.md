@@ -1,12 +1,12 @@
-- [ ] Create app skeleton
-  - [ ] React router
-  - [ ] App container
-  - [ ] React redux
-  - [ ] Reducer
-  - [ ] Initial state
-  - [ ] Actions
-  - [ ] Data
-  - [ ] Localstorage persistence
+- [x] Create app skeleton
+  - [x] React router
+  - [x] App container
+  - [x] React redux
+  - [x] Reducer
+  - [x] Initial state
+  - [x] Actions
+  - [x] Data
+  - [x] Localstorage persistence
 - [x] add bodyparser to express routes
 - [ ] Websocket setup
 - [ ] Authentication
@@ -15,7 +15,7 @@
 - [ ] automate adding a new app layer
 - [x] Browser refresh for dev env
 - [x] add nice index file stuff
-- [ ] Move hardcoded gulp locations to config
+- [x] Move hardcoded gulp locations to config
 - [ ] Write rest of readme
   - [ ] Mention uses yarn
   - [ ] Explain yarn commands
