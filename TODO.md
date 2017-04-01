@@ -1,0 +1,16 @@
+- [ ] Create app skeleton
+  - [ ] React router
+  - [ ] App container
+  - [ ] React redux
+  - [ ] Reducer
+  - [ ] Initial state
+  - [ ] Actions
+  - [ ] Data
+  - [ ] Localstorage persistence
+- [ ] Websocket setup
+- [ ] Authentication
+- [ ] DB setup
+- [ ] useful scss
+- [ ] automate adding a new app layer
+- [ ] Browser refresh for dev env
+- [ ] Write rest of readme

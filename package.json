@@ -1,0 +1,57 @@
+{
+  "name": "einlandr",
+  "version": "0.0.1",
+  "main": "index.js",
+  "repository": {
+    "url": "git@github.com:jgnewman/einlandr",
+    "type": "git"
+  },
+  "engines": {
+    "node": "^6.10.0",
+    "yarn": "^0.15.1"
+  },
+  "scripts": {
+    "dev": ". env-dev && node index",
+    "prod": ". env-prod && node index",
+    "test": ""
+  },
+  "author": "John Newman <rescuecreative@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.15.3",
+    "babel": "^6.23.0",
+    "babel-cli": "^6.24.0",
+    "babel-core": "^6.24.0",
+    "babel-loader": "^6.4.1",
+    "babel-preset-es2015": "^6.24.0",
+    "babel-preset-react": "^6.23.0",
+    "babel-register": "^6.24.0",
+    "babelify": "^7.3.0",
+    "body-parser": "^1.17.1",
+    "brightsocket.io": "^0.0.6",
+    "browserify": "^14.1.0",
+    "express": "^4.15.2",
+    "forever": "^0.15.3",
+    "gulp": "^3.9.1",
+    "gulp-clean": "^0.3.2",
+    "gulp-clean-css": "^3.0.4",
+    "gulp-concat": "^2.6.1",
+    "gulp-sass": "^3.1.0",
+    "gulp-sourcemaps": "^2.5.0",
+    "gulp-uglify": "^2.1.2",
+    "gulp-util": "^3.0.8",
+    "jsonwebtoken": "^7.3.0",
+    "ngrok": "^2.2.6",
+    "nodemailer": "^3.1.8",
+    "react": "^15.4.2",
+    "react-dom": "^15.4.2",
+    "react-redux": "^5.0.3",
+    "react-router": "^4.0.0",
+    "redux": "^3.6.0",
+    "sequelize": "^3.30.4",
+    "socket.io": "^1.7.3",
+    "uuid": "^3.0.1",
+    "vinyl-buffer": "^1.0.0",
+    "vinyl-source-stream": "^1.1.0"
+  }
+}
