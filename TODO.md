@@ -11,7 +11,7 @@
 - [ ] Websocket setup
 - [ ] Authentication
 - [ ] DB setup
-- [ ] useful scss
+- [x] useful scss
 - [x] automate adding a new app layer
 - [x] Browser refresh for dev env
 - [x] add nice index file stuff
