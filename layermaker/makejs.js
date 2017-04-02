@@ -98,26 +98,28 @@ function makeJs(names, callback) {
   var reducersIndex  = path.resolve(__dirname, '../', 'frontend', 'src', 'js', 'reducers', 'reducers.js');
   var stateIndex     = path.resolve(__dirname, '../', 'frontend', 'src', 'js', 'state', 'initialstate.js');
 
-  // try {
-  //   fs.writeFileSync(actionsPath, actionsTemplate);
-  //   log(colors.yellow('Built'), names.actionsFile);
-  // } catch (err) {
-  //   console.log(err);
-  // }
-  //
-  // try {
-  //   fs.writeFileSync(dataPath, dataTemplate);
-  //   log(colors.yellow('Built'), names.dataFile);
-  // } catch (err) {
-  //   console.log(err);
-  // }
-  //
-  // try {
-  //   fs.writeFileSync(handlersPath, handlersTemplate);
-  //   log(colors.yellow('Built'), names.handlersFile);
-  // } catch (err) {
-  //   console.log(err);
-  // }
+  // Write all new files...
+
+  try {
+    fs.writeFileSync(actionsPath, actionsTemplate);
+    log(colors.yellow('Built'), names.actionsFile);
+  } catch (err) {
+    console.log(err);
+  }
+
+  try {
+    fs.writeFileSync(dataPath, dataTemplate);
+    log(colors.yellow('Built'), names.dataFile);
+  } catch (err) {
+    console.log(err);
+  }
+
+  try {
+    fs.writeFileSync(handlersPath, handlersTemplate);
+    log(colors.yellow('Built'), names.handlersFile);
+  } catch (err) {
+    console.log(err);
+  }
 
   try {
     fs.writeFileSync(containerPath, containerTemplate);
@@ -126,12 +128,35 @@ function makeJs(names, callback) {
     console.log(err);
   }
 
-  // try {
-  //   fs.writeFileSync(componentPath, componentTemplate);
-  //   log(colors.yellow('Built'), names.componentFile);
-  // } catch (err) {
-  //   console.log(err);
-  // }
+  try {
+    fs.writeFileSync(componentPath, componentTemplate);
+    log(colors.yellow('Built'), names.componentFile);
+  } catch (err) {
+    console.log(err);
+  }
+
+  // Inject all existing files...
+
+  try {
+    inject(constantsIndex, [constantTemplate]);
+    log(colors.yellow('Injected'), 'new data into constants.js');
+  } catch (err) {
+    console.log(err);
+  }
+
+  try {
+    inject(stateIndex, [stateKeyValTemplate]);
+    log(colors.yellow('Injected'), 'new data into initialstate.js');
+  } catch (err) {
+    console.log(err);
+  }
+
+  try {
+    inject(reducersIndex, [reducerImportTemplate, reducerKeyValTemplate]);
+    log(colors.yellow('Injected'), 'new data into reducers.js');
+  } catch (err) {
+    console.log(err);
+  }
 
   log('Finished', colors.cyan('new JavaScript layer'), "after", colors.magenta(timer.end()));
   callback && callback();
