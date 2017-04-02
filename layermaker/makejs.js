@@ -80,7 +80,7 @@ function makeJs(names, callback) {
 
   var actionsTemplate       = makeActionsTemplate(names.constants);
   var dataTemplate          = makeDataTemplate(names.constants);
-  var handlerTemplate       = makeHandlerTemplate();
+  var handlersTemplate      = makeHandlerTemplate();
   var containerTemplate     = makeConstantTemplate(names);
   var componentTemplate     = makeComponentTemplate(names);
   var constantTemplate      = makeConstantTemplate(names.component, names.constants);
