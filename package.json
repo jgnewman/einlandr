@@ -13,6 +13,7 @@
   "scripts": {
     "dev": ". env-dev && node index",
     "prod": ". env-prod && node index",
+    "layer": "node layermaker/make",
     "test": ""
   },
   "author": "John Newman <rescuecreative@gmail.com>",
