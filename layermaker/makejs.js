@@ -27,7 +27,7 @@ Need to inject:
 
 function makeConstantTemplate(capitalized, allCaps) {
   return '/**\n'
-       + ' * Constants for ' + capitalize + '-related items\n'
+       + ' * Constants for ' + capitalized + '-related items\n'
        + ' */\n'
        + 'export const' + allCaps + ' = objectize([\n'
        + "  'FOO'\n"
