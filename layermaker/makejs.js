@@ -34,6 +34,23 @@ function makeConstantTemplate(capitalized, allCaps) {
        + ']);';
 }
 
+function makeReducerTemplate(allCaps, lowercase) {
+  return "import initialState from '../state/initialstate';\n"
+       + "import { " + allCaps + " } from '../lib/constants';\n";
+       + "\n"
+       + "export default function reducer(state = initialState." + lowercase + ", action) {\n"
+       + "  switch (action.type) {\n"
+       + "\n"
+       + "    case " + allCaps + ".FOO:\n"
+       + "      return Object.assign({}, state, {});\n"
+       + "\n"
+       + "    default:\n"
+       + "      return state;\n"
+       + "  }\n"
+       + "}\n"
+       ;
+}
+
 function makeReducerImportTemplate(reducers, reducersImport) {
   return 'import ' + reducers + " from '" + reducersImport + "';";
 }
@@ -83,6 +100,7 @@ function makeJs(names, callback) {
   var handlersTemplate      = makeHandlerTemplate();
   var containerTemplate     = makeContainerTemplate(names);
   var componentTemplate     = makeComponentTemplate(names);
+  var reducersTemplate      = makeReducerTemplate(names.constatns, names.state)
   var constantTemplate      = makeConstantTemplate(names.component, names.constants);
   var reducerImportTemplate = makeReducerImportTemplate(names.reducers, names.reducersImport);
   var reducerKeyValTemplate = makeReducerKeyVal(names.state, names.reducers);
@@ -117,6 +135,13 @@ function makeJs(names, callback) {
   try {
     fs.writeFileSync(handlersPath, handlersTemplate);
     log(colors.yellow('Built'), names.handlersFile);
+  } catch (err) {
+    console.log(err);
+  }
+
+  try {
+    fs.writeFileSync(reducersPath, reducersTemplate);
+    log(colors.yellow('Built'), names.reducersFile);
   } catch (err) {
     console.log(err);
   }
