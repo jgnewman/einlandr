@@ -2,7 +2,7 @@ var fs = require('fs');
 var gutil = require('gulp-util');
 var log = gutil.log;
 
-function inject(path, conentArray) {
+function inject(path, contentArray) {
   var contents;
 
   try {
