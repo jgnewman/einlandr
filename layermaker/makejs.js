@@ -36,7 +36,7 @@ function makeConstantTemplate(capitalized, allCaps) {
 
 function makeReducerTemplate(allCaps, lowercase) {
   return "import initialState from '../state/initialstate';\n"
-       + "import { " + allCaps + " } from '../lib/constants';\n";
+       + "import { " + allCaps + " } from '../lib/constants';\n"
        + "\n"
        + "export default function reducer(state = initialState." + lowercase + ", action) {\n"
        + "  switch (action.type) {\n"
@@ -100,7 +100,7 @@ function makeJs(names, callback) {
   var handlersTemplate      = makeHandlerTemplate();
   var containerTemplate     = makeContainerTemplate(names);
   var componentTemplate     = makeComponentTemplate(names);
-  var reducersTemplate      = makeReducerTemplate(names.constatns, names.state)
+  var reducersTemplate      = makeReducerTemplate(names.constants, names.state)
   var constantTemplate      = makeConstantTemplate(names.component, names.constants);
   var reducerImportTemplate = makeReducerImportTemplate(names.reducers, names.reducersImport);
   var reducerKeyValTemplate = makeReducerKeyVal(names.state, names.reducers);
