@@ -2,7 +2,6 @@ import { retrieveState, uniqueId } from '../lib/localPersist';
 
 const initialState = {
   /* INJECT POINT 1 */
-
   app: {}
 
 };

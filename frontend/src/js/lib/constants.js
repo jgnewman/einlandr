@@ -14,7 +14,6 @@ function objectize(array) {
 
 
 /* INJECT POINT 1 */
-
 /**
  * Constants for App-related items
  */

@@ -1,5 +1,5 @@
 import appReducers from './appReducers';
-/* INJECT POINT 1 */
+/* BACK INJECT POINT 1 */
 
 
 const reducers = {

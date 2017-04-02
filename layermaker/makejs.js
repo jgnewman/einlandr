@@ -29,7 +29,7 @@ function makeConstantTemplate(capitalized, allCaps) {
   return '/**\n'
        + ' * Constants for ' + capitalized + '-related items\n'
        + ' */\n'
-       + 'export const' + allCaps + ' = objectize([\n'
+       + 'export const ' + allCaps + ' = objectize([\n'
        + "  'FOO'\n"
        + ']);';
 }
@@ -39,11 +39,11 @@ function makeReducerImportTemplate(reducers, reducersImport) {
 }
 
 function makeReducerKeyVal(name, reducers) {
-  return name + ': ' + reducers + ',';
+  return '  ' + name + ': ' + reducers + ',';
 }
 
 function makeStateKeyVal(name) {
-  return name + ': {},';
+  return '  ' + name + ': {},';
 }
 
 function makeActionsTemplate(constants) {
