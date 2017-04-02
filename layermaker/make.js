@@ -1,13 +1,16 @@
 var gutil = require('gulp-util');
 var Timer = require('./timer');
 var makeStyles = require('./makestyles');
+var makeJs = require('./makejs');
 var log = gutil.log;
 var colors = gutil.colors;
 
 var layerName = process.argv[process.argv.length - 1].toLowerCase();
 var mainTimer = new Timer();
+var stylesFinished = false;
+var jsFinished = true;
 
-var ayerNameUppercase, layerNameCapital, names;
+var layerNameUppercase, layerNameCapital, names;
 
 log('Building new React layer', "'" + colors.cyan(layerName) + "'...");
 mainTimer.start();
@@ -28,12 +31,23 @@ names = {
   constants: layerNameUppercase,
   reducers: layerName + 'Reducers',
   reducersFile: layerName + 'Reducers.js',
+  reducersImport: './' + layerName + 'Reducers',
   state: layerName,
   scssFile: '_' + layerName + '.scss',
   scssImport: './' + layerName,
   scssSelector: '#application .' + layerName
 };
 
-makeStyles(names, function () {
+function finish() {
   log('Finished new React layer', "'" + colors.cyan(layerName) + "' after", colors.magenta(mainTimer.end()));
+}
+
+makeStyles(names, function () {
+  stylesFinished = true;
+  jsFinished && finish();
 });
+
+makeJs(names, function () {
+  jsFinished = true;
+  stylesFinished && finish();
+})

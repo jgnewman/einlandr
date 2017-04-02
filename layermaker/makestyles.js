@@ -24,6 +24,7 @@ function makeStyles(names, callback) {
     } else {
       log('Built', newFileName);
       inject(stylesIndex, ["@import '" + names.scssImport + "';"]);
+      log('Injected new import line into', stylesIndex);
       log('Finished', colors.cyan('new style layer'), "after", colors.magenta(timer.end()));
       callback && callback();
     }
