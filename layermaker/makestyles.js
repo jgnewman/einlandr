@@ -22,9 +22,9 @@ function makeStyles(names, callback) {
     if (err) {
       log(error);
     } else {
-      log('Built', newFileName);
+      log(colors.yellow('Built'), names.scssFile);
       inject(stylesIndex, ["@import '" + names.scssImport + "';"]);
-      log('Injected new import line into', stylesIndex);
+      log(colors.yellow('Injected'), 'new import line into index.scss');
       log('Finished', colors.cyan('new style layer'), "after", colors.magenta(timer.end()));
       callback && callback();
     }
