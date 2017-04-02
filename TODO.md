@@ -12,7 +12,7 @@
 - [ ] Authentication
 - [ ] DB setup
 - [ ] useful scss
-- [ ] automate adding a new app layer
+- [x] automate adding a new app layer
 - [x] Browser refresh for dev env
 - [x] add nice index file stuff
 - [x] Move hardcoded gulp locations to config
