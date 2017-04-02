@@ -5,6 +5,7 @@ import sass from 'gulp-sass';
 import cleanCSS from 'gulp-clean-css';
 import sourcemaps from 'gulp-sourcemaps';
 import gulpif from 'gulp-if';
+import { prepReload } from '../reloader/server-reloader';
 import config from '../config';
 
 /**
@@ -23,7 +24,7 @@ gulp.task('scss:compile', ['scss:clean'], () => {
                    .pipe(gulpif(config.isProduction, cleanCSS(), sourcemaps.write()))
                    .pipe(gulp.dest(config.frontend.scssDest));
 
-   stream.on('end', config.actions.prepReload);
+   stream.on('end', prepReload);
    return stream;
 });
 

@@ -1,4 +1,6 @@
 import gulp from 'gulp';
+import { log, colors } from 'gulp-util';
+import { finishRefreshing } from './reloader/server-reloader';
 import './tasks/server-tasks';
 import './tasks/style-tasks';
 import './tasks/js-tasks';
@@ -12,4 +14,7 @@ gulp.task('templates', ['templates:clean', 'templates:compile', 'templates:watch
 
 gulp.task('serve', ['server:start', 'server:watch']);
 
-gulp.task('up', ['scss', 'js', 'templates', 'serve']);
+gulp.task('up', ['scss', 'js', 'templates', 'serve'], () => {
+  log(colors.green('App is alive!'));
+  finishRefreshing();
+});

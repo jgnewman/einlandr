@@ -7,8 +7,6 @@ const config = {
   isProduction: process.env.NODE_ENV === 'production',
 
   frontend: {
-    // Reload values
-    needsReload: true,
 
     // Javascript values
     jsEntry:   './frontend/src/js/index.js',
@@ -30,20 +28,10 @@ const config = {
   backend: {
 
     // top level files, tasks, and backend files
-    serverSource: ['./*', './tasks/**/*', './backend/**/*']
+    serverSource: ['./*', './tasks/**/*', './backend/**/*', './reloader/**/*'],
 
-  },
+    serverPort: 8080
 
-  actions: {
-
-    prepReload: () => {
-      config.frontend.needsReload = true
-    },
-
-    unprepReload: () => {
-      log('Preparing browser for reload...');
-      config.frontend.needsReload = false
-    }
   }
 };
 

@@ -2,45 +2,10 @@ import gulp from 'gulp';
 import { log, colors } from 'gulp-util';
 import clean from 'gulp-clean';
 import mustache from 'gulp-mustache';
+import { prepReload } from '../reloader/server-reloader';
+import getReloadTemplate from '../reloader/browser-reloader';
 import config from '../config';
 
-
-function generateReloadCode() {
-  return config.isProduction ? '' : `
-    <script>
-      (function () {
-        var interval;
-        var needsReload = false;
-        function ajax(to, onload) {
-          var xhr = new XMLHttpRequest();
-          xhr.addEventListener('load', onload);
-          xhr.open('GET', to);
-          xhr.send();
-        }
-        function ajaxCycle() {
-          ajax(
-            location.protocol + '//' + location.host + '/einlandr-reload',
-            function () {
-              if (this.status === 200) {
-                if (needsReload || JSON.parse(this.responseText).needsReload) {
-                  needsReload = true;
-                  ajax(location.href, function () {
-                    if (this.status === 200) {
-                      needsReload = false;
-                      clearInterval(interval);
-                      location.reload();
-                    }
-                  });
-                }
-              }
-            }
-          );
-        }
-        interval = setInterval(ajaxCycle, 3000);
-      }());
-    </script>
-  `;
-}
 
 /**
  * Remove old files
@@ -54,10 +19,10 @@ gulp.task('templates:clean', () => {
  */
 gulp.task('templates:compile', ['templates:clean'], () => {
   const stream = gulp.src(config.frontend.templateEntry)
-                     .pipe(mustache({ reload: generateReloadCode() }))
+                     .pipe(mustache({ reload: config.isProduction ? '' : getReloadTemplate() }))
                      .pipe(gulp.dest(config.frontend.templateDest));
 
-  stream.on('end', config.actions.prepReload);
+  stream.on('end', prepReload);
   return stream;
 });
 

@@ -7,6 +7,7 @@ import uglify from 'gulp-uglify';
 import gulpif from 'gulp-if';
 import source from 'vinyl-source-stream';
 import buffer from 'vinyl-buffer';
+import { prepReload } from '../reloader/server-reloader';
 import config from '../config';
 
 
@@ -28,8 +29,8 @@ gulp.task('js:compile', ['js:clean'], () => {
                    .pipe(buffer())
                    .pipe(gulpif(config.isProduction, uglify()))
                    .pipe(gulp.dest(config.frontend.jsDest));
-                   
-  stream.on('end', config.actions.prepReload);
+
+  stream.on('end', prepReload);
   return stream;
 });
 
