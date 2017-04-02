@@ -78,15 +78,15 @@ function makeJs(names, callback) {
   timer.start();
   log('Starting', colors.cyan('new JavaScript layer') + '...');
 
-  var constantTemplate = makeConstantTemplate(names.component, names.constants);
-  var reducerImportTemplate = makeReducerImportTemplate(names.reducers, names.reducersImport);
-  var reducerKeyValTemplate = makeReducerKeyVal(names.state, names.reducers);
-  var stateKeyValTemplate = makeStateKeyVal(names.state);
   var actionsTemplate = makeActionsTemplate(names.constants);
   var dataTemplate = makeDataTemplate(names.constants);
   var handlerTemplate = makeHandlerTemplate();
   var containerTemplate = makeConstantTemplate(names);
   var componentTemplate = makeComponentTemplate(names);
+  var constantTemplate = makeConstantTemplate(names.component, names.constants);
+  var reducerImportTemplate = makeReducerImportTemplate(names.reducers, names.reducersImport);
+  var reducerKeyValTemplate = makeReducerKeyVal(names.state, names.reducers);
+  var stateKeyValTemplate = makeStateKeyVal(names.state);
 
   var actionsPath = path.resolve(__dirname, 'frontend', 'src', 'js', 'actions', names.actionsFile);
   var dataPath = path.resolve(__dirname, 'frontend', 'src', 'js', 'data', names.dataFile);
@@ -97,6 +97,41 @@ function makeJs(names, callback) {
   var reducersPath = path.resolve(__dirname, 'frontend', 'src', 'js', 'reducers', names.reducersFile);
   var reducersIndex = path.resolve(__dirname, 'frontend', 'src', 'js', 'reducers', 'reducers.js');
   var stateIndex = path.resolve(__dirname, 'frontend', 'src', 'js', 'state', 'initialstate.js');
+
+  try {
+    fs.writeFileSync(actionsPath, actionsTemplate);
+    log('Built', names.actionsFile);
+  } catch (err) {
+    console.log(err);
+  }
+
+  try {
+    fs.writeFileSync(dataPath, dataTemplate);
+    log('Built', names.dataFile);
+  } catch (err) {
+    console.log(err);
+  }
+
+  try {
+    fs.writeFileSync(handlersPath, handlersTemplate);
+    log('Built', names.handlersFile);
+  } catch (err) {
+    console.log(err);
+  }
+
+  try {
+    fs.writeFileSync(containerPath, containerTemplate);
+    log('Built', names.containerFile);
+  } catch (err) {
+    console.log(err);
+  }
+
+  try {
+    fs.writeFileSync(componentPath, componentTemplate);
+    log('Built', names.componentFile);
+  } catch (err) {
+    console.log(err);
+  }
 
   log('Finished', colors.cyan('new JavaScript layer'), "after", colors.magenta(timer.end()));
   callback && callback();
