@@ -78,25 +78,25 @@ function makeJs(names, callback) {
   timer.start();
   log('Starting', colors.cyan('new JavaScript layer') + '...');
 
-  var actionsTemplate = makeActionsTemplate(names.constants);
-  var dataTemplate = makeDataTemplate(names.constants);
-  var handlerTemplate = makeHandlerTemplate();
-  var containerTemplate = makeConstantTemplate(names);
-  var componentTemplate = makeComponentTemplate(names);
-  var constantTemplate = makeConstantTemplate(names.component, names.constants);
+  var actionsTemplate       = makeActionsTemplate(names.constants);
+  var dataTemplate          = makeDataTemplate(names.constants);
+  var handlerTemplate       = makeHandlerTemplate();
+  var containerTemplate     = makeConstantTemplate(names);
+  var componentTemplate     = makeComponentTemplate(names);
+  var constantTemplate      = makeConstantTemplate(names.component, names.constants);
   var reducerImportTemplate = makeReducerImportTemplate(names.reducers, names.reducersImport);
   var reducerKeyValTemplate = makeReducerKeyVal(names.state, names.reducers);
-  var stateKeyValTemplate = makeStateKeyVal(names.state);
+  var stateKeyValTemplate   = makeStateKeyVal(names.state);
 
-  var actionsPath = path.resolve(__dirname, 'frontend', 'src', 'js', 'actions', names.actionsFile);
-  var dataPath = path.resolve(__dirname, 'frontend', 'src', 'js', 'data', names.dataFile);
-  var handlersPath = path.resolve(__dirname, 'frontend', 'src', 'js', 'handlers', names.handlersFile);
-  var containerPath = path.resolve(__dirname, 'frontend', 'src', 'js', 'containers', names.containerFile);
-  var componentPath = path.resolve(__dirname, 'frontend', 'src', 'js', 'components', names.componentFile);
-  var constantsIndex = path.resolve(__dirname, 'frontend', 'src', 'js', 'lib', 'constants.js');
-  var reducersPath = path.resolve(__dirname, 'frontend', 'src', 'js', 'reducers', names.reducersFile);
-  var reducersIndex = path.resolve(__dirname, 'frontend', 'src', 'js', 'reducers', 'reducers.js');
-  var stateIndex = path.resolve(__dirname, 'frontend', 'src', 'js', 'state', 'initialstate.js');
+  var actionsPath    = path.resolve(__dirname, '../', 'frontend', 'src', 'js', 'actions', names.actionsFile);
+  var dataPath       = path.resolve(__dirname, '../', 'frontend', 'src', 'js', 'data', names.dataFile);
+  var handlersPath   = path.resolve(__dirname, '../', 'frontend', 'src', 'js', 'handlers', names.handlersFile);
+  var containerPath  = path.resolve(__dirname, '../', 'frontend', 'src', 'js', 'containers', names.containerFile);
+  var componentPath  = path.resolve(__dirname, '../', 'frontend', 'src', 'js', 'components', names.componentFile);
+  var constantsIndex = path.resolve(__dirname, '../', 'frontend', 'src', 'js', 'lib', 'constants.js');
+  var reducersPath   = path.resolve(__dirname, '../', 'frontend', 'src', 'js', 'reducers', names.reducersFile);
+  var reducersIndex  = path.resolve(__dirname, '../', 'frontend', 'src', 'js', 'reducers', 'reducers.js');
+  var stateIndex     = path.resolve(__dirname, '../', 'frontend', 'src', 'js', 'state', 'initialstate.js');
 
   try {
     fs.writeFileSync(actionsPath, actionsTemplate);
