@@ -13,6 +13,8 @@
   "scripts": {
     "dev": ". env-dev && node index",
     "prod": ". env-prod && node index",
+    "dev:migrate": ". env-dev && gulp db:migrate",
+    "prod:migrate": ". env-prod && gulp db:migrate", 
     "layer": "node layermaker/make",
     "test": ""
   },
@@ -46,6 +48,7 @@
     "jsonwebtoken": "^7.3.0",
     "ngrok": "^2.2.6",
     "nodemailer": "^3.1.8",
+    "pg": "^6.1.5",
     "react": "^15.4.2",
     "react-dom": "^15.4.2",
     "react-redux": "^5.0.3",

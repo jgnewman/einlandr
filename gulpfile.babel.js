@@ -5,6 +5,7 @@ import './tasks/server-tasks';
 import './tasks/style-tasks';
 import './tasks/js-tasks';
 import './tasks/template-tasks';
+import './tasks/db-tasks';
 
 gulp.task('scss', ['scss:clean', 'scss:compile', 'scss:watch']);
 

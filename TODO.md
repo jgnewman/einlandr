@@ -10,12 +10,14 @@
 - [x] add bodyparser to express routes
 - [ ] Websocket setup
 - [ ] Authentication
-- [ ] DB setup
+- [x] DB setup
 - [x] useful scss
 - [x] automate adding a new app layer
 - [x] Browser refresh for dev env
 - [x] add nice index file stuff
 - [x] Move hardcoded gulp locations to config
+- [ ] Make sure we correctly choose a prod/dev port
+- [ ] Useful middlewares?
 - [ ] Write rest of readme
   - [ ] Mention uses yarn
   - [ ] Explain yarn commands

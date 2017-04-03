@@ -4,6 +4,7 @@ import brightsocket from 'brightsocket.io';
 import attachMiddlewares from './server-middlewares';
 import attachRoutes from './server-routes';
 import { attachReload, markRefreshing } from '../reloader/server-reloader';
+import dbReady from './db-init';
 import config from '../config';
 
 let app, server, socketServer;
@@ -15,6 +16,7 @@ export function startServer() {
   attachMiddlewares(app);
   attachRoutes(app);
   !config.isProduction && attachReload(app);
+  config.backend.dbEnabled && dbReady();
   server.listen(config.backend.serverPort);
 }
 

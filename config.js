@@ -27,10 +27,20 @@ const config = {
 
   backend: {
 
-    // top level files, tasks, and backend files
-    serverSource: ['./*', './tasks/**/*', './backend/**/*', './reloader/**/*'],
+    serverPort: 8080,
+    serverSource: [
+      './*', // Glob top level files but not protected directories
+      '!./{frontend,layermaker,.git,node_modules}',
 
-    serverPort: 8080
+      './tasks/**/*',   // gulp tasks
+      './backend/**/*', // backend files
+      './reloader/**/*' // reloader files
+    ],
+
+    dbEnabled: true,
+    dbURL: process.env.DB_URL || '',
+    dbSecret: process.env.DB_SECRET || '',
+    dbDevName: process.env.DB_DEV_NAME || ''
 
   }
 };

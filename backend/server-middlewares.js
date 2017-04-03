@@ -2,7 +2,13 @@ import path from 'path';
 import express from 'express';
 import bodyParser from 'body-parser';
 
+
 export default function attachMiddlewares(app) {
+
+  /******************************
+   * Attach your middleware here
+   ******************************/
+
 
   /**
    * Add some bodyparser goodness to requests
