@@ -19,7 +19,9 @@ export default function migrate(callback) {
        * Create your data here
        ******************************/
 
-       // Example
+       // Example.
+       // Note that a user record is necessary for
+       // authentication to work.
       .then(() => create(models.User, {
         firstName: 'John',
         lastName: 'Doe',
@@ -27,7 +29,7 @@ export default function migrate(callback) {
         password: 'asdf;laksjdf'
       }, 'Created user John Doe'))
 
-      // Example
+      // Example.
       .then(() => create(models.User, {
         firstName: 'David',
         lastName: 'Cohen',

@@ -1,6 +1,7 @@
 import path from 'path';
 import express from 'express';
 import bodyParser from 'body-parser';
+import config from '../config';
 
 
 export default function attachMiddlewares(app) {
@@ -16,6 +17,17 @@ export default function attachMiddlewares(app) {
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: false }));
   app.use(bodyParser.text());
+
+  /**
+   * Conditionally enable cross-origin resource sharing
+   */
+  if (config.backend.corsEnabled) {
+    app.use((req, res, next) => {
+      res.header("Access-Control-Allow-Origin", "*");
+      res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+      next();
+    });
+  }
 
   /**
    * Serve static assets

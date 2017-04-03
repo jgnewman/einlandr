@@ -3,6 +3,7 @@ import express from 'express';
 import brightsocket from 'brightsocket.io';
 import attachMiddlewares from './server-middlewares';
 import attachRoutes from './server-routes';
+import attachNgrok from './server-ngrok';
 import { attachReload, markRefreshing } from '../reloader/server-reloader';
 import dbReady from './db-init';
 import config from '../config';
@@ -16,6 +17,7 @@ export function startServer() {
   attachMiddlewares(app);
   attachRoutes(app);
   !config.isProduction && attachReload(app);
+  config.backend.ngrokEnabled && attachNgrok(app);
   config.backend.dbEnabled && dbReady();
   server.listen(config.backend.serverPort);
 }

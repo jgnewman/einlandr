@@ -1,12 +1,13 @@
 import Sequelize from 'sequelize';
 import { log, colors } from 'gulp-util';
 import defineModels from './db-models';
+import defineAPI from './db-api';
 import config from '../config';
 
 const connectHooks = [];
 let connected = false;
 let connecting = false;
-let db, models;
+let db, models, api;
 
 function generateDBErr(err) {
   return ` Unable to connect to the database: "${err}"
@@ -73,9 +74,8 @@ function dbConnect() {
       connecting = false;
       db = tempDB;
       models = defineModels(tempDB);
-
-      // Necessary for dbReady to function properly.
-      connectHooks.forEach(hook => hook(tempDB, models));
+      api = defineAPI(tempDB, models);
+      connectHooks.forEach(hook => hook(tempDB, models, api));
     });
 
     authenticated.catch(err => {
@@ -102,8 +102,12 @@ function dbConnect() {
  */
 export default function dbReady(hook) {
   if (config.backend.dbEnabled) {
-    connected && hook && hook(db, models);
-    hook && connectHooks.push(hook);
+
+    // If we're already connected, execute hook.
+    connected && hook && hook(db, models, api);
+
+    // Otherwise, push the hook into the queue.
+    !connected && hook && connectHooks.push(hook);
 
     // If the database appears to have no intention of
     // connecting on its own, connect to it so our

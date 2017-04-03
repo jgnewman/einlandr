@@ -11,6 +11,8 @@
 - [ ] Websocket setup
 - [ ] Authentication
 - [x] DB setup
+- [x] DB api
+- [x] use ngrok
 - [x] useful scss
 - [x] automate adding a new app layer
 - [x] Browser refresh for dev env

@@ -37,10 +37,15 @@ const config = {
       './reloader/**/*' // reloader files
     ],
 
+    // Database specific values
     dbEnabled: true,
     dbURL: process.env.DB_URL || '',
     dbSecret: process.env.DB_SECRET || '',
-    dbDevName: process.env.DB_DEV_NAME || ''
+    dbDevName: process.env.DB_DEV_NAME || '',
+
+    // Cross-origin resource sharing
+    corsEnabled: false,
+    ngrokEnabled: false
 
   }
 };
