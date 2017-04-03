@@ -1,7 +1,46 @@
 # Einlandr
 
-Einlandr is a light-weight bootstrapping environment for React apps running on Node servers with Postgres databases.
+Einlandr is a robust bootstrapping environment for React apps running on Node servers with Postgres databases that runs on Yarn.
 
-On the front end it features a clean application architecture utilizing react-redux to manage state with built-in local storage persistence. It comes ready to work with both a REST API and a websocket API, and follows the container/presentational component schema.
+## Features
 
-On the back end it features a gulp + express server with automatic browser refreshing, hot server code loading, scss, and ES6 support. It is pre-packaged with API authentication shared between REST API and websocket connections, and a clean way to load in environment variables for development and production builds.
+On the front end:
+
+- A clean, ready-made application architecture following the container/presentational pattern, great for managing...
+  - containers
+  - components
+  - actions
+  - reducers
+  - event handlers
+  - data
+  - misc libraries
+  - initial state
+  - redux middleware
+  - redux devtools
+- A clean, ready-made scss architecture dividing styles up in a way that follows your application structure
+- Bootstrapped react-router
+- Bootstrapped react-redux state management
+- Bootstrapped localStorage state persistence
+- Axios for utilizing a built-in REST API
+- Websockets for utilizing a built-in Websocket API
+- A yarn command for generating a new application layer on the fly
+- Placeholders for fonts, images, and a favicon
+
+On the back end:
+
+- Gulp + Express
+- A configurable nature
+- Env variables for both prod vs dev environments
+- Minified CSS and JavaScript for prod environment
+- Automatic browser refreshing for dev environment
+- Automatic server refresh + browser refresh when server files change
+- Optionally enable/disable ngrok for development
+- Optionally enable/disable CORS
+- Optionally enable/disable use of a database
+- A bootstrapped database schema with Users and Sessions
+- A bootstrapped database migration script + Yarn command
+- A bootstrapped http API
+- A bootstrapped Websocket API
+- Built-in authentication using JSON web tokens
+- Authentication shared between http and Websocket APIs
+- Ability to easily add express middleware and routes

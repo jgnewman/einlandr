@@ -9,8 +9,8 @@
   - [x] Localstorage persistence
 - [x] add bodyparser to express routes
 - [x] http Authentication
-- [ ] Websocket setup
-- [ ] Websocket authentication
+- [x] Websocket setup
+- [x] Websocket authentication
 - [x] DB setup
 - [x] DB api
 - [x] use ngrok

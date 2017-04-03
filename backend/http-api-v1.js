@@ -59,4 +59,8 @@ export default function attachAPI(app, dbAPI) {
          .catch(() => { res.sendStatus(404) });
   });
 
+  /*******************************************
+   * Add your api routes here
+   *******************************************/
+
 }

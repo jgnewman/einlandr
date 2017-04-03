@@ -6,6 +6,7 @@ import attachRoutes from './server-routes';
 import attachNgrok from './server-ngrok';
 import { attachReload, markRefreshing } from '../reloader/server-reloader';
 import attachAPI from './http-api-v1';
+import attachSocketAPI from './socket-api-v1';
 import dbReady from './db-init';
 import config from '../config';
 
@@ -21,6 +22,7 @@ export function startServer() {
   config.backend.ngrokEnabled && attachNgrok(app);
   config.backend.dbEnabled && dbReady((db, models, dbAPI) => {
     attachAPI(app, dbAPI);
+    attachSocketAPI(socketServer, dbAPI);
   });
   server.listen(config.backend.serverPort);
 }
