@@ -1,15 +1,11 @@
 import path from 'path';
 import express from 'express';
 import bodyParser from 'body-parser';
+import { checkAuth } from './server-auth';
 import config from '../config';
 
 
 export default function attachMiddlewares(app) {
-
-  /******************************
-   * Attach your middleware here
-   ******************************/
-
 
   /**
    * Add some bodyparser goodness to requests
@@ -17,6 +13,11 @@ export default function attachMiddlewares(app) {
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: false }));
   app.use(bodyParser.text());
+
+  /**
+   * Allow authenticating requests
+   */
+  app.use(checkAuth());
 
   /**
    * Conditionally enable cross-origin resource sharing
@@ -62,6 +63,10 @@ export default function attachMiddlewares(app) {
   app.use('/app', express.static(
     path.resolve(__dirname, '../', 'frontend', 'app')
   ));
+
+  /*************************************
+   * Attach your custom middleware here
+   *************************************/
 
 
 }

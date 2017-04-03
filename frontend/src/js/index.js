@@ -7,6 +7,9 @@ import AppContainer from './containers/AppContainer';
 
 import store from './state/store';
 
+import axios from 'axios';
+window.axios = axios;
+
 ReactDom.render((
   <Provider store={store}>
     <Router>

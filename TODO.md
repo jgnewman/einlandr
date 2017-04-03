@@ -8,8 +8,9 @@
   - [x] Data
   - [x] Localstorage persistence
 - [x] add bodyparser to express routes
+- [x] http Authentication
 - [ ] Websocket setup
-- [ ] Authentication
+- [ ] Websocket authentication
 - [x] DB setup
 - [x] DB api
 - [x] use ngrok
@@ -19,7 +20,7 @@
 - [x] add nice index file stuff
 - [x] Move hardcoded gulp locations to config
 - [ ] Make sure we correctly choose a prod/dev port
-- [ ] Useful middlewares?
+- [x] Useful middlewares?
 - [ ] Write rest of readme
   - [ ] Mention uses yarn
   - [ ] Explain yarn commands

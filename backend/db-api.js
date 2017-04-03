@@ -11,7 +11,18 @@ function removePassword(record) {
 function asyncRemovePassword(recordPromise) {
   return new Promise((resolve, reject) => {
     recordPromise.catch(err => reject(err));
-    recordPromise.then(result => resolve(removePassword(result)));
+    recordPromise.then(result => {
+      if (!result) {
+        reject('No record found.');
+      } else {
+        try {
+          const clean = removePassword(result);
+          resolve(clean);
+        } catch (err) {
+          reject(err);
+        }
+      }
+    });
   });
 }
 
@@ -22,7 +33,7 @@ function asyncUnpack(recordPromise) {
       if (Array.isArray(result)) {
         const desiredItem = result[1]; // result[0] is the number of affected rows
         if (Array.isArray(desiredItem)) {
-          resolve(removePassword(esiredItem[0]));
+          resolve(removePassword(desiredItem[0]));
         } else {
           resolve(removePassword(desiredItem));
         }
@@ -51,7 +62,10 @@ export default function defineAPI(db, models) {
     api[`read${key}`] = primaryKey => {
       const promise = models[key].findById(primaryKey);
       promise.catch(err => log(colors.red(err)));
-      promise.then(() => log(colors.green(`Successfully retrieved ${key}`)));
+      promise.then(result => {
+        result ? log(colors.green(`Successfully retrieved ${key}`))
+               : log(colors.blue(`Could not find a matching record.`));
+      });
       return asyncRemovePassword(promise);
     };
 
@@ -62,7 +76,10 @@ export default function defineAPI(db, models) {
         returning: true
       });
       promise.catch(err => log(colors.red(err)));
-      promise.then(() => log(colors.green(`Successfully updated ${key}`)));
+      promise.then(result => {
+        result[0] ? log(colors.green(`Successfully updated ${key}`))
+                  : log(colors.blue('No records were updated.'));
+      });
       return asyncUnpack(promise);
     };
 
@@ -78,26 +95,19 @@ export default function defineAPI(db, models) {
      * Define the rest of your API here
      ***********************************/
 
-    // Example. (Normally it's good to return a promise)
-    // api.getItemsByUser = userId => {
-    //   return new Promise((resolve, reject) => {
-    //     const user = api.readUser(userId); // Find the right user.
-    //     const items = [];
-    //     user.catch(err => reject(err)); // Spit out an error if there's a problem.
-    //     user.then(userRecord => {
-    //       userRecord.items.forEach(itemId => {
-    //         const item = api.readItem(itemId);
-    //         item.catch(err => reject(err));
-    //         item.then(itemRecord => {
-    //           items.push(itemRecord);
-    //           if (items.length === userRecord.items.length) {
-    //             resolve(items);
-    //           }
-    //         });
-    //       });
-    //     });
-    //   });
-    // };
+    // Example
+    // Note, this is necessary for authentication to work.
+    api.authUser = (email, password) => {
+      const promise = models.User.findOne({
+        where: { email: email, password: password }
+      });
+      promise.catch(err => log(colors.red(err)));
+      promise.then(result => {
+        result ? log(colors.green(`Found user with matching email & password.`))
+               : log(colors.blue(`Could not find user with matching email & password.`));
+      });
+      return asyncRemovePassword(promise);
+    };
 
   });
 
