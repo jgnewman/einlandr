@@ -13,11 +13,12 @@ Jump to...
 - [Configuring server routes](#configuring-server-routes)
 - [Configuring server middleware](#configuring-server-middleware)
 - [Using the http API](#using-the-http-api)
-
 - [Using the websocket API](#using-the-websocket-api)
+
 - [Using authentication](#using-authentication)
 - [Understanding the front end](#understanding-the-front-end)
 - [Adding a new React layer](#adding-a-new-react-layer)
+- [About auto refreshing](#about-auto-refreshing)
 - [All the yarn commands](#all-the-yarn-commands)
 
 ## Features
@@ -227,4 +228,65 @@ app.get('/api/v1/users/:id', (req, res) => {
        // If something went wrong, send a 404 instead.
        .catch(() => { res.sendStatus(404) });
 });
+```
+
+## Using the websocket API
+
+Einlandr uses [Brightsocket.io](https://www.npmjs.com/package/brightsocket.io), a lesser-known but rather cool abstraction over Socket.io for managing websocket APIs.
+
+If you open up backend/socket-api-v1.js, you'll find 2 areas prepared for you to start writing code. The first is labeled "Add additional action handlers here" and the second is labeled "Add additional websocket channels here".
+
+The first area is where you can describe API events for authenticated users (more on authentication later). The second area is where you can start doing more advanced things with Brightsocket.io once you get how it works.
+
+Within the first area, an example of how you might write an API call using websockets has been written for you:
+
+```javascript
+// When an authenticated user sends the GET_USER action,
+// we'll expect the payload to have a userId property.
+connection.receive('GET_USER', payload => {
+
+  // Use the database API to read a user by id.
+  dbAPI.readUser(payload.userId)
+
+       // If it's successful, send the result to the user as
+       // a USER_RECORD action. The client side will listen for
+       // this action and handle the result when it comes in.
+       .then(result => connection.send('USER_RECORD', result))
+
+       // If it didn't work, send the NOT_FOUND action instead.
+       .catch(result => connection.send('NOT_FOUND'));
+});
+```
+
+On the client side, you can authenticate using a method like this:
+
+```javascript
+import brightsocket from 'brightsocket.io-client';
+
+const socket = brightsocket();
+const credentials = {
+  email: 'fake@fake.com',
+  password: 'asdf;laksjdf'
+};
+
+let sessionId;
+
+function defineApi() {
+
+  socket.send('GET_USER', {
+    sessionId: sessionId,
+    userId: 1
+  });
+
+  socket.receive('USER_RECORD' payload => {
+    console.log('Received user record', payload);
+  });
+}
+
+socket.connect('AUTHENTICATION', credentials, () => {
+  socket.receive('AUTHENTICATED', payload => {
+    sessionId = payload.sessionId;
+    socket.connect(payload.reconnect, { sessionId: sessionId }, defineApi);
+  });
+})
 ```

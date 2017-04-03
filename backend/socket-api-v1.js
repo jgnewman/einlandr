@@ -75,9 +75,9 @@ export default function attachSocketAPI(socketServer, dbAPI) {
      *******************************************/
 
     // Example.
-    // connection.receive('GET_USER', userId => {
-    //   dbAPI.readUser(userId)
-    //        .then(result => connection.send('GOT_USER', result))
+    // connection.receive('GET_USER', payload => {
+    //   dbAPI.readUser(payload.userId)
+    //        .then(result => connection.send('USER_RECORD', result))
     //        .catch(result => connection.send('NOT_FOUND'));
     // });
 

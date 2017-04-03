@@ -11,6 +11,8 @@
 - [x] http Authentication
 - [x] Websocket setup
 - [x] Websocket authentication
+- [ ] Write example authentication into the frontend
+- [ ] Adjust brightsocket to use promises on the client side (change readme)
 - [x] DB setup
 - [x] DB api
 - [x] use ngrok
