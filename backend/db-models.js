@@ -6,10 +6,7 @@ export default function defineModels(db) {
 
   const models = {};
 
-  /******************************
-   * Define your models here
-   ******************************/
-
+  // Example.
   // A user table with email and password is necessary for authentication
   // to work. Feel free to modify any other fields.
   models.User = db.define('user', {
@@ -20,10 +17,15 @@ export default function defineModels(db) {
     password:     { type: S.STRING, validate: { notEmpty: true } }
   });
 
+  // Example.
   // A session table is necessary for authentication to work.
   models.Session = db.define('session', {
     id: { type: S.STRING(750), primaryKey: true, unique: true, validate: { notEmpty: true } }
   });
+
+  /******************************
+   * Define your models here
+   ******************************/
 
   return models;
 

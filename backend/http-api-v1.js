@@ -60,7 +60,7 @@ export default function attachAPI(app, dbAPI) {
   });
 
   /*******************************************
-   * Add your api routes here
+   * Add more API routes here
    *******************************************/
 
 }

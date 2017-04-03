@@ -15,10 +15,6 @@ export default function migrate(callback) {
     // Drop existing tables and create schema
     db.sync({ force: true })
 
-      /******************************
-       * Create your data here
-       ******************************/
-
        // Example.
        // Note that a user record is necessary for
        // authentication to work.
@@ -36,6 +32,10 @@ export default function migrate(callback) {
         email: 'example@example.com',
         password: 'qweproiupoi'
       }, 'Created user David Cohen'))
+
+      /******************************
+       * Create your data here
+       ******************************/
 
       // Necessary for the migrate task to exit properly
       .then(() => {

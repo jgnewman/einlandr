@@ -19,7 +19,7 @@ export function startServer() {
   attachMiddlewares(app);
   attachRoutes(app);
   !config.isProduction && attachReload(app);
-  config.backend.ngrokEnabled && attachNgrok(app);
+  !config.isProduction && config.backend.ngrokEnabled && attachNgrok(app);
   config.backend.dbEnabled && dbReady((db, models, dbAPI) => {
     attachAPI(app, dbAPI);
     attachSocketAPI(socketServer, dbAPI);
