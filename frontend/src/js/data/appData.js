@@ -3,28 +3,43 @@ import brightsocket from 'brightsocket.io-client';
 import { APP } from '../lib/constants';
 
 export function foo(sessionId, userId, userData) {
-  // An axios GET request with authorization.
-  // Returns a promise.
-  //
-  // return axios.get(`/api/v1/users/${userId}`, {
-  //   headers: { Authorization: `Basic ${sessionId}` }
-  // });
 
-  // An axios POST request with authorization.
-  // Returns a promise.
-  //
-  // return axios.post(
-  //   '/api/v1/users/',
-  //   userData,
-  //   { headers: { Authorization: `Basic ${sessionId}` } }
-  // );
-
-  // Connect to a socket with authorization.
-  // Requires a corresponding 'MY_CHANNEL' socket handler on the server side.
-  //
-  // const socket = brightsocket();
-  // socket.connect('MY_CHANNEL', { sessionId: sessionId }, () => {
-  //   socket.receive('EVENT_1', result => console.log(result));
-  //   socket.send('EVENT_2', userData);
-  // });
 }
+
+// EXAMPLE
+// Authenticate via websocket, returning a promise
+// const socket = brightsocket();
+//
+// export function socketAuth(credentials) {
+//   return new Promise((resolve, reject) => {
+//     socket.connect('AUTHENTICATION', credentials, () => {
+//       socket.receive('AUTHENTICATED', data => {
+//         socket.connect('AUTHENTICATED', data, () => resolve(data))
+//       });
+//       socket.receive('UNAUTHORIZED', () => reject());
+//     });
+//   });
+// }
+//
+// After authenticating, all of your messages passed to the socket
+// should contain a sessionId property as returned in the authentication data.
+
+
+// EXAMPLE
+// Authenticate via ajax, returning a promise
+//
+// export function ajaxAuth(credentials) {
+//   return axios.post('/api/vi/authentication', credentials);
+// }
+
+
+// EXAMPLE
+// Make an ajax post using a session id token, returning a promise
+//
+// export function createUser(sessionId, userData) {
+//   return axios.post(
+//     '/api/v1/users',
+//     userData,
+//     { headers: { Authorization: `Basic ${sessionId}` } }
+//   );
+// }

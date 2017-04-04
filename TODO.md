@@ -11,7 +11,7 @@
 - [x] http Authentication
 - [x] Websocket setup
 - [x] Websocket authentication
-- [ ] Write example authentication into the frontend
+- [x] Write example authentication into the frontend
 - [x] DB setup
 - [x] DB api
 - [x] use ngrok
