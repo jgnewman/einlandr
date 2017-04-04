@@ -22,6 +22,7 @@
 - [x] add nice index file stuff
 - [x] Move hardcoded gulp locations to config
 - [ ] Make sure we correctly choose a prod/dev port
+- [ ] New command for generating individual component
 - [x] Useful middlewares?
 - [x] Write rest of readme
   - [x] Mention uses yarn
