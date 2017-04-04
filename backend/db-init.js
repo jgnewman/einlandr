@@ -10,7 +10,10 @@ let connecting = false;
 let db, models, api;
 
 function generateDBErr(err) {
-  return ` Unable to connect to the database: "${err}"
+  return ` Unable to connect to the database:
+
+           "${err}"
+
            Make sure you have created the database and turned it on.
            You can also disable usage of a database in the config.
          `.trim();

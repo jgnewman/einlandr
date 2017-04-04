@@ -27,7 +27,7 @@ const config = {
 
   backend: {
 
-    serverPort: 8080,
+    serverPort: process.env.SERVER_PORT,
     serverSource: [
       './*', // Glob top level files but not protected directories
       '!./{frontend,layermaker,.git,node_modules}',

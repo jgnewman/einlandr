@@ -12,7 +12,6 @@
 - [x] Websocket setup
 - [x] Websocket authentication
 - [ ] Write example authentication into the frontend
-- [ ] Adjust brightsocket to use promises on the client side (change readme)
 - [x] DB setup
 - [x] DB api
 - [x] use ngrok
@@ -21,7 +20,7 @@
 - [x] Browser refresh for dev env
 - [x] add nice index file stuff
 - [x] Move hardcoded gulp locations to config
-- [ ] Make sure we correctly choose a prod/dev port
+- [x] Make sure we correctly choose a prod/dev port
 - [ ] New command for generating individual component
 - [x] Useful middlewares?
 - [x] Write rest of readme

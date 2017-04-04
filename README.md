@@ -87,6 +87,7 @@ The files should be called `env-dev` and `env-prod` respectively. No file extens
 
 ```bash
 export NODE_ENV=development
+export SERVER_PORT=8080
 export DB_DEV_NAME=einlandr
 export DB_SECRET="I've got a secret, I'm not gonna tell you"
 ```
@@ -95,10 +96,13 @@ export DB_SECRET="I've got a secret, I'm not gonna tell you"
 
 ```bash
 export NODE_ENV=production
+export SERVER_PORT=5000
 export DB_SECRET="Pirates always fight with cutlasses"
 ```
 
 Everything you do with Einlandr is run through Yarn commands. These commands will source these files as appropriate, making them available throughout your server environment. That said, the expected workflow is that the config file should adjust itself based on these variables, then the rest of the server uses the config file. As you add new layers to your application that require environment variables, you will want to store those in these files.
+
+Note that these are just example values. You can change them as needed.
 
 ## Using up a database
 
