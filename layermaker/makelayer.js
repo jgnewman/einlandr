@@ -12,6 +12,12 @@ var jsFinished = true;
 
 var layerNameUppercase, layerNameCapital, names;
 
+// Die if there's no component name
+if (process.argv.length < 3) {
+  log(colors.red('Can not make a nameless layer. Please try again using the pattern `yarn layer <name>`'));
+  process.exit(1);
+}
+
 log('Building new React layer', "'" + colors.cyan(layerName) + "'...");
 mainTimer.start();
 
