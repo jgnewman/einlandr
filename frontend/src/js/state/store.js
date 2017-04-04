@@ -10,7 +10,7 @@ const store = createStore(
   devToolsCompose(
     applyMiddleware(
       createBasicMiddleware((state, next) => {
-        // Nothing for now but we may need this later
+        // Nothing for now but you may need this later
         next();
       })
     )

@@ -3,3 +3,18 @@
   min-height: 100vh;
   background: url('../img/einlandr.png') center center no-repeat transparent;
 }
+
+#application .app {
+  min-width: 100vw;
+  min-height: 100vh;
+
+  .einlandr-title {
+    color: lighten(#000000, 18%);
+    font-size: 2em;
+    font-weight: bold;
+    position: absolute;
+    letter-spacing: 15px;
+    top: 50%;
+    left: 50%;
+  }
+}

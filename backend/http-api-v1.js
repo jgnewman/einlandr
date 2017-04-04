@@ -12,10 +12,7 @@ export default function attachAPI(app, dbAPI) {
     requireFor: ['/api/v1/*'],
     bypassFor: [
       '/api/v1/authentication',
-      '/api/v1/authentication/*',
-
-      // Bypasses for testing
-      '/api/v1/users/*'
+      '/api/v1/authentication/*'
     ]
   }));
 
@@ -40,7 +37,7 @@ export default function attachAPI(app, dbAPI) {
     .catch(result => res.sendStatus(401));
   });
 
-  // GET to authentication/logout
+  // POST to authentication/logout
   // Log a user out
   app.post('/api/v1/authentication/logout', (req, res) => {
     const token = req.body.token;

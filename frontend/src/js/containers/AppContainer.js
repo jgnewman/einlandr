@@ -2,6 +2,7 @@ import React from 'react';
 import { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
+import bindHandlers from '../lib/bindhandlers';
 
 import App from '../components/App';
 
@@ -12,6 +13,9 @@ import * as handlers from '../handlers/appHandlers';
 class AppContainer extends Component {
   constructor() {
     super();
+    this.state = {
+      containerName: 'AppContainer'
+    };
   }
 
   render() {
@@ -21,7 +25,7 @@ class AppContainer extends Component {
       <App
         data={data}
         actions={actions}
-        handlers={handlers}
+        handlers={bindHandlers(this, handlers)}
       />
     );
   }
@@ -30,6 +34,7 @@ class AppContainer extends Component {
 /**
  * Returns a collection of props on the component that
  * correspond to values in the redux state.
+ * { foo: state.app.foo }
  */
 function select(state) {
   return {};

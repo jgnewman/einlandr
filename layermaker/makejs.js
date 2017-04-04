@@ -16,6 +16,7 @@ Need to create:
   - handler file
   - container file
   - component file
+  - reducer file
 
 Need to inject:
   - constants

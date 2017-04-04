@@ -23,7 +23,7 @@
 - [x] Move hardcoded gulp locations to config
 - [ ] Make sure we correctly choose a prod/dev port
 - [x] Useful middlewares?
-- [ ] Write rest of readme
-  - [ ] Mention uses yarn
-  - [ ] Explain yarn commands
-  - [ ] Explain all features
+- [x] Write rest of readme
+  - [x] Mention uses yarn
+  - [x] Explain yarn commands
+  - [x] Explain all features

@@ -14,11 +14,12 @@ import config from '../config';
  */
 export function generateSession(record, createSession) {
   return new Promise((resolve, reject) => {
-    const expiration = Math.floor(Date.now() / 1000) + (60 * 60 * 12);
-    const token = jwt.sign({
-      data: record,
-      exp: expiration // 12 hours
-    }, config.backend.dbSecret);
+    const expiration = config.backend.sessionExpiry;
+    const token = jwt.sign(
+      { data: record },
+      config.backend.dbSecret,
+      { expiresIn: (60 * 60) * expiration
+    });
     const creator = createSession({ id: token });
     creator.then(() => resolve(token));
     creator.catch(err => reject(err));

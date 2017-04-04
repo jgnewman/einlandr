@@ -37,6 +37,9 @@ const config = {
       './reloader/**/*' // reloader files
     ],
 
+    // Session specific values
+    sessionExpiry: 12, // This number is in hours
+
     // Database specific values
     dbEnabled: true,
     dbURL: process.env.DB_URL || '',

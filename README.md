@@ -14,7 +14,6 @@ Jump to...
 - [Configuring server middleware](#configuring-server-middleware)
 - [Using the http API](#using-the-http-api)
 - [Using the websocket API](#using-the-websocket-api)
-
 - [Using authentication](#using-authentication)
 - [Understanding the front end](#understanding-the-front-end)
 - [Adding a new React layer](#adding-a-new-react-layer)
@@ -230,6 +229,16 @@ app.get('/api/v1/users/:id', (req, res) => {
 });
 ```
 
+On the client side, Einlandr comes packaged with [Axios](https://www.npmjs.com/package/axios), a promise-based library for quickly making ajax requests. For example:
+
+```javascript
+import axios from 'axios';
+
+axios.get('/api/v1/users/1')
+     .then(user => { console.log(user) })
+     .catch(err => { console.log(err) });
+```
+
 ## Using the websocket API
 
 Einlandr uses [Brightsocket.io](https://www.npmjs.com/package/brightsocket.io), a lesser-known but rather cool abstraction over Socket.io for managing websocket APIs.
@@ -290,3 +299,286 @@ socket.connect('AUTHENTICATION', credentials, () => {
   });
 })
 ```
+
+## Using authentication
+
+Einlandr comes with a built-in method for authentication using json web tokens. Here's how it works and how you'll use it:
+
+### Database schema
+
+In backend/db-models.js, a User model and a Session model have already been created. Users are expected to have an email address and password to match against for authentication. When a user is authenticated, a session will be created in the sessions table.
+
+By running the migration script (`$ yarn dev:migrate`), you will have 2 users created in the database that you can experiment with.
+
+### Http api
+
+In backend/http-api-v1.js, two routes have been created for authentication, specifically `POST /api/v1/authentication/` and `POST /api/v1/authentication/logout`.
+
+An example login would look like the following:
+
+```javascript
+import axios from 'axios';
+
+// Post credentials to the api
+axios.post('/api/v1/authentication', {
+  email: 'fake@fake.com',
+  password: 'asdf;laksjdf'
+})
+
+// If it worked, we'll get back a session token and a
+// user record.
+.then(result => { console.log(result.token, result.user) })
+
+// If not, we'll log the error.
+.catch(err => { console.log(err) });
+```
+
+And an example logout would look like the following:
+
+```javascript
+import axios from 'axios';
+
+// Post the token to the logout endpoint.
+axios.post('/api/v1/authentication/logout', { token: sessionId })
+
+// Log if it worked.
+.then(() => { console.log('logged out') })
+
+// Log if it didn't (this would be a server error)
+.catch(err => { console.log(err) });
+```
+
+Once logged in, you'll need to pass in correct, standard ajax headers for any API route that requires authentication. For example:
+
+```javascript
+const token = // The token you got from logging in
+
+axios.post('/api/v1/some-protected-route', dataToSend, {
+  headers: { Authorization: `Basic ${token}` }
+});
+```
+
+If you try to access a route that requires you to be authenticated and the `Authorization` header is not properly formed, you will get back a `401`.
+
+### Protecting http routes
+
+In backend/server-middlewares.js, you will notice this call: `app.use(checkAuth())`. This causes a function to run that checks authorization on every request. However, it will only _enforce_ authorization on routes you specify.
+
+In backend/http-api-v1.js, you'll notice this call:
+
+```javascript
+app.use(applyAuth({
+  requireFor: ['/api/v1/*'],
+  bypassFor: [
+    '/api/v1/authentication',
+    '/api/v1/authentication/*'
+  ]
+}));
+```
+
+The `applyAuth` function is where you will specify which routes you would like to protect by enforcing authorization. By default, authorization is not enforced on any routes so, in the `requireFor` key, we've specified that authorization should be required for all routes beginning with `/api/v1/`. This lets us quickly protect the entire API. However, there are a few routes within that glob we'd like to let through. In particular, we can't enforce authorization on authentication end points because they are designed to be accessed by unauthenticated users. To fix this, we've added those routes to the `bypassFor` key. Anything listed here will be allowed through without requiring authentication.
+
+### How authorization is checked
+
+Whether it's via http or websockets (more on that in a minute), users will have to pass in the token they received when logging in to prove they are allowed to access protected routes.
+
+In config.js you are allowed to specify how long a token is good for using the `sessionExpiry` key. By default, this key is set to 12, meaning 12 hours. You can adjust this at your leisure.
+
+When a user is authenticated, a session is created in the database. Whenever a request comes in that needs to be authenticated, the token is used to retrieve the session from the database and validate it. If the session gets invalidated, the session is automatically removed from the database.
+
+### Websocket API
+
+Because Einlandr uses [Brightsocket.io](https://www.npmjs.com/package/brightsocket.io) for websocket handling (and due to the nature of websockets generally), authentication is a little looser.
+
+In backend/socket-api-v1.js, two brightsocket channels have been created for you. A brightsocket channel is essentially a partition of your websocket API. Before an incoming connection can do anything, it has to identify a channel it wants to use. Once it does, it will only have access to the events described within that channel until it reconnects and chooses a different channel.
+
+Here, the two channels we've created are called `AUTHENTICATION` and `AUTHENTICATED`.
+
+The `AUTHENTICATION` channel uses the database API to try to authenticate users then sends back the result. An incoming connection to this channel should include an `email` and `password` key in its payload. If the credentials can be authenticated, the server will send an event called "AUTHENTICATED" back through the connection with the following data attached:
+
+```
+{
+  reconnect: 'AUTHENTICATED', // The channel the user should reconnect to
+  user: { ... }, // The user record of the authenticated user
+  sessionId: 'qoiwuerakfjdh...' // The auth token
+}
+```
+
+In any other case, the server will send back "UNAUTHORIZED" or "SERVER_ERROR" depending on what went wrong.
+
+Once authenticated, it's time for the connection to reconnect to the `AUTHENTICATED` channel. You'll notice that this channel has a call to `addFilter` in it, which is essentially middleware for Brightsocket.io. Any connection who can pass the test imposed by the filter will be allowed access to the rest of the API defined within this channel. Otherwise, it will be send "UNAUTHORIZED".
+
+Specifically, this channel demands that every time data comes in through a connection (including when the actual connection occurs) that the payload include a `sessionId` key containing a valid session token. If it does, it will be able to access the websocket events you have set up within this channel.
+
+To see an example of how client-side code might authenticate itself, take a look at [Using the websocket API](#using-the-websocket-api).
+
+## Understanding the front end
+
+Then entire front end of the application lives in the "frontend" directory. As you might expect, there are files in here you'll want to modify and also files you'll want to leave alone because they are generated by the build process.
+
+### Which files should be left alone
+
+You'll want to ignore the entire frontend/css directory. It is exclusively used by the build process and will get wiped clean with every build. Instead, you'll define your styles using scss in the frontend/src/scss directory.
+
+You'll also want to ignore frontend/index.html. This file is modified by the build process in that it changes depending upon whether you're in a development or production environment. If you want to modify change this file, you'll need to edit frontend/src/templates/index.html instead.
+
+Fonts and images are just static files and Einlandr doesn't do anything with them. As such, feel free to put your fonts and images directly into frontend/fonts and frontend/img. You can also modify frontend/favicon.ico at will. Einlandr won't mess with it.
+
+Most of the files you'll be dealing with on a regular basis live in frontend/src/js and frontend/src/scss.
+
+### Scss structure
+
+All of the project's source styles live in frontend/src/scss. Within this directory there is a subdirectory called "global" as well as 2 scss files:
+
+- global - Contains all of your scss utility files: normalize, variables, fonts, mixins, classes, and universal styles.
+- index.scss - imports all other scss files in the correct order
+- \_application.scss - A file corresponding to the `AppContainer` component in your application.
+
+The structural concept here is that, for every container in your React app, you should add a corresponding file next to \_application.scss and import it into index.scss. This way you can keep your styles organized by sections in the same way you will be organizing your JavaScript.
+
+Normally, if you're adding a large new piece to your application with its own container, it's good to let Einlandr set the whole thing up for you. See [Adding a new React layer](#adding-a-new-react-layer) for more information on that.
+
+### JavaScript structure
+
+Your React app lives in frontend/src/js. At the root of this directory there are many subdirectories and a single file called index.js. Let's explore what's going on with each piece.
+
+#### index.js
+
+This file imports react-redux's store provider component and wraps it around an instance of react-router. The `/` route has already been defined for you and is attached to your `AppContainer` component. Within this file, react-dom also renders your application into the html.
+
+#### containers
+
+Each major "chunk" of your application should be divided into containers. This is comprised of a container component, at least one presentation component, and usually a place in the application state, a reducer, some event handlers, some data functions, and some redux actions. As you explore the various directories inside frontend/src/js, you'll see examples of this.
+
+A container component should import data functions, redux actions, and event handlers and export a react-redux `connect`ed version of the component where state and actions have been mapped to props. A container should also instantiate a presentational component and begin passing down props. In AppContainer.js, all actions have been gathered into a single object that can be passed down to every nested component as a package. The same has been done with data functions and event handlers. Normally you'll want to be a bit more explicit with state values because the app will dynamically update along with those values, not so with these other functions.
+
+#### components
+
+There should be at least one presentational component nested within a container. In the case of AppContainer.js, the component App.js is rendered by the container.
+
+As much as possible, presentational components should focus solely on the display of the html and calling event handlers when the user interacts with the DOM. All the heavy lifting should be done at the container level, within library code, or within actions, handlers, or data functions themselves.
+
+#### handlers
+
+In order to assist presentational components in remaining strictly presentational, handlers should be imported in from the handlers file, bound to the container, and serve the purpose of calling other functions at the container level. Here's an imaginary example:
+
+We may imagine a handler imported by ApplicationContainer.js called `clickHandler` that looks like this:
+
+```javascript
+export function clickHandler(evt) {
+  evt.preventDefault();
+  this.doSomethingAfterClick();
+}
+```
+
+The `doSomethingAfterClick` function would be defined on the ApplicationContainer component and then, when the ApplicationContainer renders the Application component, it would pass the handler down like this:
+
+```javascript
+doSomethingAfterClick() {
+  ...
+}
+
+render() {
+  return (
+    <Application
+      clickHandler={clickHandler.bind(this)}
+    />
+  )
+}
+```
+
+This way, wherever in the presentational nesting the handler actually gets called, we will have a predictable place to know where it gets dealt with – at the container level. At the same time, we keep our presentational components clean from spaghetti.
+
+In Einlandr's case, all of the handlers are automatically bound to the container for you via the call to `bindHandlers` that you see in the AppContainer's `render` method.
+
+#### data
+
+Like handlers, data files should export functions that serve the purpose of accessing your application's API. When you use Yarn to add a new React layer, a data file will be generated that automatically imports both axios and Brightsocket.io to help you with your API calls.
+
+#### actions & constants
+
+Actions are somewhat like data files and handler files except they serve the purpose of triggering redux actions. When these functions are imported into the container, you should use react-redux's `bindActionCreators` to hook them up to redux. You will notice that in AppContainer.js, they are all collected into a package called "actions" that becomes a single prop you can pass down.
+
+Einlandr helps you out with your potentially long list of redux action names by allowing you to group action names by container and defining them as re-usable constants. These constants are defined in frontend/src/js/lib/constants.js. If you look at this file you will see that AppContainer-related constants live in a collection called `APP`. For each container you can create a list of constants that becomes an object with matching keys and values when you call `objectize` on it. This will allow you to define your constants in an array but access them from an object. For example:
+
+```javascript
+// In constants.js...
+export const FOO = objectize(['BAR', 'BAZ', 'QUUX']);
+
+// In actions/fooActions.js...
+import { FOO } from '../lib/constants';
+
+export function bar(payload) {
+  return {
+    type: FOO.BAR,
+    payload: payload
+  }
+}
+```
+
+#### reducers & initial state
+
+In the reducers directory you should make a reducer file for each container and compose that into the collection of reducers found in frontend/src/js/reducers/reducers.js (normally best handled by using yarn to generate a new React layer).
+
+You can see a great example of a container-specific reducer file in frontend/src/js/reducers/appReducers.js. This reducer imports our initial state and makes sure that if no state is available when the reducer is called, the initial state will be used. It also imports our re-usable constants to help us be confident that the action types we listen for here match the action types specified in the actions file.
+
+The initial state is found in frontend/src/js/state/initialstate.js. Each container should have its own entry in the initial state so that reducers have a confined place to work and we have an easy collection of values that we can map to props within a container.
+
+#### localstorage persistence
+
+Notice that initialstate.js imports a function called `retrieveState`. This function tries to retrieve a stored copy of the state from `localStorage` and subsequently `hydrateInitialState` uses that to automatically populate our initial state with any stored values that may exist as soon as the app fires up.
+
+To go along with that, in frontend/src/js/state/store.js, there is a subscription set up on all state changes that saves the state to `localStorage`. For a little extra security, this function will not store any values where the key matches `/password/`. This way, if you are storing things like form inputs, you won't accidentally capture a password in localStorage. Be on the lookout for stuff like that!
+
+#### redux middleware
+
+Writing redux middleware always seems to feel weirdly convoluted. As such, Einlandr provides an easy way to throw together some nice middleware.
+
+In frontend/src/js/state/store.js, you'll see an example that calls the function `createBasicMiddleware`. That function takes a copy of the state and the `next` function. Like any normal middleware, you'll call `next` to move on to the next function. You can call `createBasicMiddleware` as many times you want and pass all those executions in to `applyMiddleware` as arguments.
+
+You may also notice a function call in this file called `devToolsCompose`. This function calls redux's `compose` function but adds in the redux devtools extension if it exists in the browser environment. This way your redux dev tools will be enabled if you have them but you won't get errors if you don't.
+
+## Adding a new React layer
+
+As you have probably guessed, Einlandr is prepared to help you create apps that go from very small to very large. Because there is a lot of structure involved, adding a new layer is a pretty involved process. You need to create a container, a presentational component, an actions file, a handlers file, a data file, a reducer, and an scss file. You also have to add in new constants, a new entry into the state, a new entry into reducers.js, and a new entry into index.scss.
+
+That's a lot. So let yarn do it for you.
+
+You may have noticed as you've explored the files that some of them have strange comments in them that look like this: `/* INJECT POINT 1 */`. These comments are there to help Einlandr add new entries to these files so that you don't have to.
+
+Let's say you wanted to make a new layer called "foo". In that case, you would run `$ yarn layer foo`. Doing so will create all the following files:
+
+- frontend/src/js/containers/FooContainer.js
+- frontend/src/js/components/Foo.js
+- frontend/src/js/actions/fooActions.js
+- frontend/src/js/data/fooData.js
+- frontend/src/js/handlers/fooHandlers.js
+- frontend/src/js/reducers/fooReducers.js
+- frontend/src/scss/\_foo.scss
+
+It will also create the proper entries for you in the following files:
+
+- frontend/src/js/lib/constants.js (creating an export called `FOO`)
+- frontend/src/js/state/initialstate.js (creating an object `state.foo`)
+- frontend/src/js/reducers/reducers.js (importing and composing in your new reducer file)
+- frontend/src/scss/index.scss (importing in your new scss file)
+
+And with all that done, you can be on your merry way.
+
+## About auto refreshing
+
+One thing to keep in mind is that Einlandr sets up file watchers all over the place. Any time a source file changes within the frontend directory, the front end will re-build itself automatically.
+
+There are also watchers set up to track changes to backend files. Changing one of those will trigger a full server refresh so that you don't manually have to restart things.
+
+If you launch the app in dev mode, Einlandr will inject some auto-refresh code into frontend/src/templates/index.html. This way, any time the app rebuilds or the server refreshes, your browser will automatically refresh as well.
+
+## All the yarn commands
+
+Everything you do when working with Einlandr will be executed via Yarn commands. Here is a list of what's available:
+
+- `$ yarn dev` - Launch the app using development variables
+- `$ yarn prod` - Launch the app using production variables
+- `$ yarn dev:migrate` - Clean and seed the development database
+- `$ yarn prod:migrate` - Clean and seed the production database
+- `$ yarn layer <name>` - Generate a new layer to the React app (see [Adding a new React Layer](#adding-a-new-react-layer))
