@@ -44,6 +44,20 @@ function asyncUnpack(recordPromise) {
   });
 }
 
+function asyncUnpackInstance(recordPromise) {
+  return new Promise((resolve, reject) => {
+    recordPromise.catch(err => reject(err));
+    recordPromise.then(result => {
+      if (Array.isArray(result)) {
+        const cleanValues = result.map(instance => removePassword(instance.dataValues));
+        resolve(cleanValues);
+      } else {
+        resolve(removePassword(result));
+      }
+    });
+  });
+}
+
 export default function defineAPI(db, models) {
   const api = {};
 
@@ -69,6 +83,19 @@ export default function defineAPI(db, models) {
       return asyncRemovePassword(promise);
     };
 
+    // Make a read-all function for each model
+    // BE CAREFUL USING THIS IF YOU HAVE LOTS OF RECORDS!
+    // `where` is an optional object of sequelize attributes
+    api[`readAll${key}`] = where => {
+      const promise = models[key].findAll(where ? { where: where } : undefined);
+      promise.catch(err => log(colors.red(err)));
+      promise.then(result => {
+        result[0] ? log(colors.green(`Successfully retrieved ${key} records`))
+                  : log(colors.blue('No records were retrieved.'));
+      });
+      return asyncUnpackInstance(promise);
+    };
+
     // Make an update-by-id function for each model
     api[`update${key}`] = (primaryKey, values) => {
       const promise = models[key].update(values, {
@@ -91,25 +118,25 @@ export default function defineAPI(db, models) {
       return promise;
     };
 
-    /***********************************
-     * Define the rest of your API here
-     ***********************************/
-
-    // Example
-    // Note, this is necessary for authentication to work.
-    api.authUser = (email, password) => {
-      const promise = models.User.findOne({
-        where: { email: email, password: password }
-      });
-      promise.catch(err => log(colors.red(err)));
-      promise.then(result => {
-        result ? log(colors.green(`Found user with matching email & password.`))
-               : log(colors.blue(`Could not find user with matching email & password.`));
-      });
-      return asyncRemovePassword(promise);
-    };
-
   });
+
+  /***********************************
+   * Define the rest of your API here
+   ***********************************/
+
+  // Example
+  // Note, this is necessary for authentication to work.
+  api.authUser = (email, password) => {
+    const promise = models.User.findOne({
+      where: { email: email, password: password }
+    });
+    promise.catch(err => log(colors.red(err)));
+    promise.then(result => {
+      result ? log(colors.green(`Found user with matching email & password.`))
+             : log(colors.blue(`Could not find user with matching email & password.`));
+    });
+    return asyncRemovePassword(promise);
+  };
 
   return api;
 }

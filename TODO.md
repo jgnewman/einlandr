@@ -22,7 +22,8 @@
 - [x] Move hardcoded gulp locations to config
 - [x] Make sure we correctly choose a prod/dev port
 - [x] New command for generating individual components
-- [ ] Add something like node-schedule to clean up unused sessions
+- [x] Add something like node-schedule to clean up unused sessions
+- [ ] Document schedules
 - [x] Useful middlewares?
 - [x] Write rest of readme
   - [x] Mention uses yarn

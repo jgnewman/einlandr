@@ -39,6 +39,7 @@ const config = {
 
     // Session specific values
     sessionExpiry: 12, // This number is in hours
+    sessionCleanFrequency: '0 * * * *', // Should be in cron format 
 
     // Database specific values
     dbEnabled: true,

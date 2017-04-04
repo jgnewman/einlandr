@@ -4,6 +4,7 @@ import brightsocket from 'brightsocket.io';
 import attachMiddlewares from './server-middlewares';
 import attachRoutes from './server-routes';
 import attachNgrok from './server-ngrok';
+import * as schedules from './server-schedules';
 import { attachReload, markRefreshing } from '../reloader/server-reloader';
 import attachAPI from './http-api-v1';
 import attachSocketAPI from './socket-api-v1';
@@ -11,6 +12,12 @@ import dbReady from './db-init';
 import config from '../config';
 
 let app, server, socketServer;
+
+function execSchedules() {
+  Object.keys(schedules).forEach(key => {
+    schedules[key]();
+  });
+}
 
 export function startServer() {
   app = express();
@@ -24,6 +31,7 @@ export function startServer() {
     attachAPI(app, dbAPI);
     attachSocketAPI(socketServer, dbAPI);
   });
+  execSchedules();
   server.listen(config.backend.serverPort);
 }
 
