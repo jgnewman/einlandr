@@ -240,6 +240,8 @@ dbReady((db, models, api) => {
 });
 ```
 
+Note that the above script will only lot out actual user data if you have already run the database migration script or you have put users into your database in some other way.
+
 ## Using the http API
 
 Einlandr starts you off with a minimally bootstrapped http API. If your app does not use a database, this will be both useless and unavailable to you.
@@ -420,6 +422,8 @@ In config.js you are allowed to specify how long a token is good for using the `
 
 When a user is authenticated, a session is created in the database. Whenever a request comes in that needs to be authenticated, the token is used to retrieve the session from the database and validate it. If the session gets invalidated, the session is automatically removed from the database.
 
+Simultaneously, while the app is running, there is a background process running a schedule that will clean expired sessions out of the database every 12 hours. See [scheduling jobs](#scheduling-jobs). You can adjust the schedule for this particular job in the config under the `sessionCleanFrequency` key.
+
 ### Websocket API
 
 Because Einlandr uses [Brightsocket.io](https://www.npmjs.com/package/brightsocket.io) for websocket handling (and due to the nature of websockets generally), authentication is a little looser.
@@ -599,6 +603,8 @@ It will also create the proper entries for you in the following files:
 
 And with all that done, you can be on your merry way.
 
+Another option you have, as opposed to adding a full layer of files, is to quickly generate a single new component. You can do this via the command `$ yarn component <name>`. For example, if you wanted to generate a new component called "Foo", you would run `$ yarn component foo`. This will generate a file called "Foo.js" for you in the components directory.
+
 ## About auto refreshing
 
 One thing to keep in mind is that Einlandr sets up file watchers all over the place. Any time a source file changes within the frontend directory, the front end will re-build itself automatically.
@@ -616,3 +622,4 @@ Everything you do when working with Einlandr will be executed via Yarn commands.
 - `$ yarn dev:migrate` - Clean and seed the development database
 - `$ yarn prod:migrate` - Clean and seed the production database
 - `$ yarn layer <name>` - Generate a new layer to the React app (see [Adding a new React Layer](#adding-a-new-react-layer))
+- `$ yarn component <name>` - Generate a single React component.
