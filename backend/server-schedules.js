@@ -1,29 +1,42 @@
-import schedule from 'node-schedule';
-import jwt from 'jsonwebtoken';
+import fs from 'fs';
+import path from 'path';
+import { spawn } from 'child_process';
 import { log, colors } from 'gulp-util';
-import dbReady from './db-init';
-import config from '../config';
 
-/**
- * Recurs as a cron job and cleans out invalid sessions
- * from the database. Frequency is set via config.backend.sessionCleanFrequency.
- */
-export function cleanSessions() {
-  dbReady((db, models, api) => {
-    schedule.scheduleJob(config.backend.sessionCleanFrequency, () => {
-      log(colors.yellow('Cleaning sessions...'));
+const childSettings = {
+  stdio: 'inherit',
+  shell: true
+};
 
-      api.readAllSession().then(sessions => {
-        sessions.forEach(session => {
+function getRealSchedules(dirContents) {
+  const realSchedules = [];
+  dirContents.forEach(fileName => {
+    if (/\.(js|jsx)$/.test(fileName)) {
+      realSchedules.push({
+        fileName: fileName,
+        filePath: path.resolve(__dirname, '../', 'schedules', fileName)
+      }); // put path on it
+    }
+  });
+  return realSchedules;
+}
 
-          jwt.verify(session.id, config.backend.dbSecret, err => {
-            if (err) {
-              log(colors.blue(`Removing session ${session.id.slice(0, 40)}...`));
-              api.deleteSession(session.id);
-            }
-          });
-        });
+export default function attachSchedules() {
+  const schedulesDir = path.resolve(__dirname, '../', 'schedules');
+  fs.readdir(schedulesDir, (err, result) => {
+
+    if (err) {
+      log(colors.red('Problem reading schedules directory:'), colors.red(err));
+
+    } else {
+
+      const scheduleFiles = getRealSchedules(result);
+      scheduleFiles.forEach(file => {
+        log("Executing schedule '" + colors.cyan(file.fileName) + "'");
+        const child = spawn(`babel-node ${file.filePath}`, childSettings);
+        child.on('close', code => log(`Child '${colors.cyan(file.fileName)}' exited with code ${code}`));
       });
-    });
+
+    }
   });
 }

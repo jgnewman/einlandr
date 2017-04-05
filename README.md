@@ -12,6 +12,7 @@ Jump to...
 - [Enabling CORS](#enabling-cors)
 - [Configuring server routes](#configuring-server-routes)
 - [Configuring server middleware](#configuring-server-middleware)
+- [Scheduling jobs](#scheduling-jobs)
 - [Using the http API](#using-the-http-api)
 - [Using the websocket API](#using-the-websocket-api)
 - [Using authentication](#using-authentication)
@@ -51,6 +52,7 @@ On the back end:
 - Gulp + Express
 - A configurable nature
 - Env variables for both prod vs dev environments
+- A job scheduler
 - Minified CSS and JavaScript for prod environment
 - Automatic browser refreshing for dev environment
 - Automatic server refresh + browser refresh when server files change
@@ -209,6 +211,34 @@ Note that static assets are already configured for you in the file server-middle
 As stated above, Einlandr uses [Express](https://expressjs.com/) for the http server. If you'd like to add middleware to http requests to your server app, you can do that in backend/server-middlewares.js.
 
 Within this file, you'll see that lots of yummy middleware is already being applied. To add more, find the area labeled "Attach your custom middleware here" and add in all the calls to `app.use` that you want.
+
+## Scheduling jobs
+
+Einlandr comes packaged with a built-in scheduler using [node-schedule](https://www.npmjs.com/package/node-schedule). To create a scheduled job, simply add a new file to the "schedules" directory. When the server starts up, each file in this directory will be launched in a child_process so that when jobs run, they won't block events on the main thread.
+
+In order to user node-schedule you may want to be familiar with cron format. However, there are plenty of more semantic ways to schedule jobs though none are quite as concise.
+
+Here is an example of a scheduled job that will run once every minute. Feel free to try it out.
+
+```javascript
+// Start by creating example.js and putting it
+// in the schedules directory. Here are the
+// contents of that file...
+
+import schedule from 'node-schedule';
+import dbReady from '../backend/db-init';
+
+// Establish a database connection
+dbReady((db, models, api) => {
+
+  // Schedule a job to run every minute
+  schedule.scheduleJob('0 * * * * *', () => {
+
+    // Read the first user from the database and log it
+    api.readUser(1).then(user => console.log(user));
+  });
+});
+```
 
 ## Using the http API
 

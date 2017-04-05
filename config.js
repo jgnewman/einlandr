@@ -32,14 +32,15 @@ const config = {
       './*', // Glob top level files but not protected directories
       '!./{frontend,layermaker,.git,node_modules}',
 
-      './tasks/**/*',   // gulp tasks
-      './backend/**/*', // backend files
-      './reloader/**/*' // reloader files
+      './tasks/**/*',    // gulp tasks
+      './backend/**/*',  // backend files
+      './reloader/**/*', // reloader files
+      './schedules/**/*' // schedule files
     ],
 
     // Session specific values
     sessionExpiry: 12, // This number is in hours
-    sessionCleanFrequency: '0 * * * *', // Should be in cron format 
+    sessionCleanFrequency: '0 */12 * * *', // Should be in cron format (every 12 hours)
 
     // Database specific values
     dbEnabled: true,

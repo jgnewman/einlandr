@@ -23,9 +23,7 @@
 - [x] Make sure we correctly choose a prod/dev port
 - [x] New command for generating individual components
 - [x] Add something like node-schedule to clean up unused sessions
-- [ ] Document schedules
+- [x] expire sessions should find all sessions where created_at is 12 hr less than now
+- [x] Document schedules
 - [x] Useful middlewares?
-- [x] Write rest of readme
-  - [x] Mention uses yarn
-  - [x] Explain yarn commands
-  - [x] Explain all features
+- [ ] Test all db API fns
