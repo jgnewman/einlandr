@@ -28,6 +28,7 @@ export default function attachAPI(app, dbAPI) {
     dbAPI.authUser(req.body.email, req.body.password).then(result => {
       if (result) {
         const creator = generateSession(result, dbAPI.createSession);
+        delete result.password;
         creator.then(token => res.send({ token: token, user: result }));
         creator.catch(() => res.sendStatus(500));
       } else {

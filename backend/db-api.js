@@ -1,62 +1,7 @@
 import dbReady from './db-init';
 import { log, colors } from 'gulp-util';
+import { simplify } from './db-utils';
 
-function removePassword(record) {
-  if (Object.prototype.hasOwnProperty.call(record, 'password')) {
-    delete record.password;
-  }
-  return record;
-}
-
-function asyncRemovePassword(recordPromise) {
-  return new Promise((resolve, reject) => {
-    recordPromise.catch(err => reject(err));
-    recordPromise.then(result => {
-      if (!result) {
-        reject('No record found.');
-      } else {
-        try {
-          const clean = removePassword(result);
-          resolve(clean);
-        } catch (err) {
-          reject(err);
-        }
-      }
-    });
-  });
-}
-
-function asyncUnpack(recordPromise) {
-  return new Promise((resolve, reject) => {
-    recordPromise.catch(err => reject(err));
-    recordPromise.then(result => {
-      if (Array.isArray(result)) {
-        const desiredItem = result[1]; // result[0] is the number of affected rows
-        if (Array.isArray(desiredItem)) {
-          resolve(removePassword(desiredItem[0]));
-        } else {
-          resolve(removePassword(desiredItem));
-        }
-      } else {
-        resolve(removePassword(result));
-      }
-    });
-  });
-}
-
-function asyncUnpackInstance(recordPromise) {
-  return new Promise((resolve, reject) => {
-    recordPromise.catch(err => reject(err));
-    recordPromise.then(result => {
-      if (Array.isArray(result)) {
-        const cleanValues = result.map(instance => removePassword(instance.dataValues));
-        resolve(cleanValues);
-      } else {
-        resolve(removePassword(result));
-      }
-    });
-  });
-}
 
 export default function defineAPI(db, models) {
   const api = {};
@@ -69,7 +14,7 @@ export default function defineAPI(db, models) {
       const promise = models[key].create(values);
       promise.catch(err => log(colors.red(err)));
       promise.then(() => log(colors.green(`Successfully created ${key}`)));
-      return asyncRemovePassword(promise);
+      return simplify(promise);
     };
 
     // Make a read-by-id function for each model
@@ -80,7 +25,7 @@ export default function defineAPI(db, models) {
         result ? log(colors.green(`Successfully retrieved ${key}`))
                : log(colors.blue(`Could not find a matching record.`));
       });
-      return asyncRemovePassword(promise);
+      return simplify(promise);
     };
 
     // Make a read-all function for each model
@@ -93,7 +38,7 @@ export default function defineAPI(db, models) {
         result[0] ? log(colors.green(`Successfully retrieved ${key} records`))
                   : log(colors.blue('No records were retrieved.'));
       });
-      return asyncUnpackInstance(promise);
+      return simplify(promise);
     };
 
     // Make an update-by-id function for each model
@@ -107,7 +52,7 @@ export default function defineAPI(db, models) {
         result[0] ? log(colors.green(`Successfully updated ${key}`))
                   : log(colors.blue('No records were updated.'));
       });
-      return asyncUnpack(promise);
+      return simplify(promise);
     };
 
     // Make a read-by-id function for each model
@@ -135,7 +80,7 @@ export default function defineAPI(db, models) {
       result ? log(colors.green(`Found user with matching email & password.`))
              : log(colors.blue(`Could not find user with matching email & password.`));
     });
-    return asyncRemovePassword(promise);
+    return simplify(promise, { preservePwd: true });
   };
 
   return api;

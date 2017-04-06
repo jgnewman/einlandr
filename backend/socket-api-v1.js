@@ -18,6 +18,7 @@ export default function attachSocketAPI(socketServer, dbAPI) {
          .then(result => {
            if (result) {
              const creator = generateSession(result, dbAPI.createSession);
+             delete result.password;
 
              // When the new session is made, send back AUTHENTICATED and
              // tell the user to reconnect to the AUTHENTICATED channel.

@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { spawn } from 'child_process';
 import { log, colors } from 'gulp-util';
+import config from '../config';
 
 const childSettings = {
   stdio: 'inherit',
@@ -32,7 +33,9 @@ export default function attachSchedules() {
 
       const scheduleFiles = getRealSchedules(result);
       scheduleFiles.forEach(file => {
-        log("Executing schedule '" + colors.cyan(file.fileName) + "'");
+        config.tmp.schedules = config.tmp.schedules || [];
+        config.tmp.schedules.push(file.fileName);
+        log(colors.green(`Executing schedule '${colors.cyan(file.fileName)}'...`));
         const child = spawn(`babel-node ${file.filePath}`, childSettings);
         child.on('close', code => log(`Child '${colors.cyan(file.fileName)}' exited with code ${code}`));
       });

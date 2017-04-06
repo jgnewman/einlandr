@@ -5,6 +5,7 @@ const config = {
   // Environment values
   env: process.env.NODE_ENV,
   isProduction: process.env.NODE_ENV === 'production',
+  tmp: {},
 
   frontend: {
 
@@ -50,7 +51,7 @@ const config = {
 
     // Cross-origin resource sharing
     corsEnabled: false,
-    ngrokEnabled: false
+    ngrokEnabled: true
 
   }
 };
