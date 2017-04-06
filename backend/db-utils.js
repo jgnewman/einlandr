@@ -15,7 +15,11 @@
  * deletes the password field. Returns the argument.
  */
 function cutPassword(value) {
-  if (typeof value === 'object' && Object.prototype.hasOwnProperty.call(value, 'password')) {
+  if (
+    value
+      && typeof value === 'object'
+      && Object.prototype.hasOwnProperty.call(value, 'password')
+  ) {
     delete value.password;
   }
   return value;
@@ -47,7 +51,11 @@ function breakDownArray(array, options) {
 function breakDown(dbResult, options) {
   if (Array.isArray(dbResult)) {
     return breakDownArray(dbResult, options);
-  } else if (dbResult && typeof dbResult === 'object' && Object.prototype.hasOwnProperty.call(dbResult, 'dataValues')) {
+  } else if (
+      dbResult
+        && typeof dbResult === 'object'
+        && Object.prototype.hasOwnProperty.call(dbResult, 'dataValues')
+  ) {
     return maybeCutPassword(dbResult.dataValues, options);
   } else {
     return maybeCutPassword(dbResult, options);
