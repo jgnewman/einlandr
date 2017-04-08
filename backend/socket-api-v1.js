@@ -65,6 +65,7 @@ export default function attachSocketAPI(socketServer, dbAPI) {
       const validator = validateSession(
         payload.sessionId,
         dbAPI.readSession,
+        dbAPI.updateSession,
         dbAPI.deleteSession
       );
       validator.then(() => next());

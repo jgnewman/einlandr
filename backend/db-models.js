@@ -20,7 +20,8 @@ export default function defineModels(db) {
   // Example.
   // A session table is necessary for authentication to work.
   models.Session = db.define('session', {
-    id: { type: S.STRING(750), primaryKey: true, unique: true, validate: { notEmpty: true } }
+    id:        { type: S.STRING(750), primaryKey: true, unique: true, validate: { notEmpty: true } },
+    expiresAt: { type: S.DATE(), validate: { notEmpty: true } }
   });
 
   /******************************

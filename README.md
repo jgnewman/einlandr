@@ -102,7 +102,7 @@ export SERVER_PORT=5000
 export DB_SECRET="Pirates always fight with cutlasses"
 ```
 
-Everything you do with Einlandr is run through Yarn commands. These commands will source these files as appropriate, making them available throughout your server environment. That said, the expected workflow is that the config file should adjust itself based on these variables, then the rest of the server uses the config file. As you add new layers to your application that require environment variables, you will want to store those in these files.
+Everything you do with Einlandr is run through Yarn commands. These commands will source these files as appropriate, making them available throughout your server environment. That said, the expected workflow is that the config file should adjust itself based on these variables, then the rest of the server uses the config file. As you add new layers to your application that require environment variables, you will want to store those in these files and then make corresponding config values.
 
 Note that these are just example values. You can change them as needed.
 
@@ -112,7 +112,7 @@ Note that these are just example values. You can change them as needed.
 
 Einlandr is optimized for Postgres. You can switch this out for something else if you'd like but I wouldn't recommend it unless you are intimately familiar with all of the Einlandr source code. A lot of things are bootstrapped for you and they assume a Postgres database.
 
-To set up a local database, make sure you have Postgres installed and some method of checking in your database to make sure everything is working. If you're a visual person and are using a Mac, I highly recommend [Postico](https://eggerapps.at/postico/).
+To set up a local database, make sure you have Postgres installed and some method of looking inside your database to make sure everything is working. If you're a visual person and are using a Mac, I highly recommend [Postico](https://eggerapps.at/postico/).
 
 Einlandr can't actually create a database for you so you'll need to do this yourself. I'll have to assume you already know how to create databases. With Postico, hit "connect", click "localhost" at the top, then click the "+ Database" button at the bottom. Give your database a name.
 
@@ -177,10 +177,10 @@ api.authUser = (email, password) => {
   });
 
   // Return a promise. When it resolves with the user
-  // record, asyncRemovePassword will cut the password
+  // record, `simplify` will cut the password
   // value out of it so that doesn't accidentally make it
   // out to the client side.
-  return asyncRemovePassword(promise);
+  return simplify(promise);
 };
 ```
 
@@ -240,7 +240,7 @@ dbReady((db, models, api) => {
 });
 ```
 
-Note that the above script will only lot out actual user data if you have already run the database migration script or you have put users into your database in some other way.
+Note that the above script will only be able to log out data if you have already run the database migration script or you have put users into your database in some other way.
 
 ## Using the http API
 
@@ -277,7 +277,7 @@ axios.get('/api/v1/users/1')
 
 ## Using the websocket API
 
-Einlandr uses [Brightsocket.io](https://www.npmjs.com/package/brightsocket.io), a lesser-known but rather cool abstraction over Socket.io for managing websocket APIs.
+Einlandr uses [Brightsocket.io](https://www.npmjs.com/package/brightsocket.io), a lesser-known but rather cool that sits on top of Socket.io for managing websocket APIs.
 
 If you open up backend/socket-api-v1.js, you'll find 2 areas prepared for you to start writing code. The first is labeled "Add additional action handlers here" and the second is labeled "Add additional websocket channels here".
 
@@ -294,7 +294,7 @@ connection.receive('GET_USER', payload => {
   dbAPI.readUser(payload.userId)
 
        // If it's successful, send the result to the user as
-       // a USER_RECORD action. The client side will listen for
+       // a USER_RECORD action. The client side should listen for
        // this action and handle the result when it comes in.
        .then(result => connection.send('USER_RECORD', result))
 
@@ -303,38 +303,6 @@ connection.receive('GET_USER', payload => {
 });
 ```
 
-On the client side, you can authenticate using a method like this:
-
-```javascript
-import brightsocket from 'brightsocket.io-client';
-
-const socket = brightsocket();
-const credentials = {
-  email: 'fake@fake.com',
-  password: 'asdf;laksjdf'
-};
-
-let sessionId;
-
-function defineApi() {
-
-  socket.send('GET_USER', {
-    sessionId: sessionId,
-    userId: 1
-  });
-
-  socket.receive('USER_RECORD' payload => {
-    console.log('Received user record', payload);
-  });
-}
-
-socket.connect('AUTHENTICATION', credentials, () => {
-  socket.receive('AUTHENTICATED', payload => {
-    sessionId = payload.sessionId;
-    socket.connect(payload.reconnect, { sessionId: sessionId }, defineApi);
-  });
-})
-```
 
 ## Using authentication
 
@@ -400,7 +368,7 @@ If you try to access a route that requires you to be authenticated and the `Auth
 
 In backend/server-middlewares.js, you will notice this call: `app.use(checkAuth())`. This causes a function to run that checks authorization on every request. However, it will only _enforce_ authorization on routes you specify.
 
-In backend/http-api-v1.js, you'll notice this call:
+To that end, in backend/http-api-v1.js, you'll notice this call:
 
 ```javascript
 app.use(applyAuth({
@@ -418,7 +386,7 @@ The `applyAuth` function is where you will specify which routes you would like t
 
 Whether it's via http or websockets (more on that in a minute), users will have to pass in the token they received when logging in to prove they are allowed to access protected routes.
 
-In config.js you are allowed to specify how long a token is good for using the `sessionExpiry` key. By default, this key is set to 12, meaning 12 hours. You can adjust this at your leisure.
+In config.js you are allowed to specify how long a token is good for using the `sessionExpiry` key. By default, this key is set to 12, meaning 12 hours from the last time it was updated. A session is updated every time it successfully validates so, in effect, this would be 12 hours since a token was last used. You can adjust this at your leisure.
 
 When a user is authenticated, a session is created in the database. Whenever a request comes in that needs to be authenticated, the token is used to retrieve the session from the database and validate it. If the session gets invalidated, the session is automatically removed from the database.
 
@@ -448,7 +416,38 @@ Once authenticated, it's time for the connection to reconnect to the `AUTHENTICA
 
 Specifically, this channel demands that every time data comes in through a connection (including when the actual connection occurs) that the payload include a `sessionId` key containing a valid session token. If it does, it will be able to access the websocket events you have set up within this channel.
 
-To see an example of how client-side code might authenticate itself, take a look at [Using the websocket API](#using-the-websocket-api).
+On the client side, you can authenticate using a method like this:
+
+```javascript
+import brightsocket from 'brightsocket.io-client';
+
+const socket = brightsocket();
+const credentials = {
+  email: 'fake@fake.com',
+  password: 'asdf;laksjdf'
+};
+
+let sessionId;
+
+function defineApi() {
+
+  socket.send('GET_USER', {
+    sessionId: sessionId,
+    userId: 1
+  });
+
+  socket.receive('USER_RECORD' payload => {
+    console.log('Received user record', payload);
+  });
+}
+
+socket.connect('AUTHENTICATION', credentials, () => {
+  socket.receive('AUTHENTICATED', payload => {
+    sessionId = payload.sessionId;
+    socket.connect(payload.reconnect, { sessionId: sessionId }, defineApi);
+  });
+})
+```
 
 ## Understanding the front end
 

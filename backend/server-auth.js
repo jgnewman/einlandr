@@ -7,21 +7,26 @@ import config from '../config';
  * on that record.
  *
  * @param  {Object}   record        A valid user record.
- * @param  {Function} createSession A function for creating a session in the database.
+ * @param  {Function} createSession A dbAPI function for creating a session in the database.
  *                                  Should return a promise.
  *
  * @return {Promise}                Resolves when the session has been created.
  */
 export function generateSession(record, createSession) {
   return new Promise((resolve, reject) => {
+
     const expiration = config.backend.sessionExpiry;
+    const expirationDate = new Date();
+    expirationDate.setHours(expirationDate.getHours() + expiration);
+
     const token = jwt.sign(
       { data: record },
       config.backend.dbSecret,
-      { expiresIn: (60 * 60) * expiration
-    });
-    const creator = createSession({ id: token });
-    creator.then(() => resolve(token));
+      { expiresIn: 60 * 60 * 24 * 365 * 100 } // 100 years-ish; we don't want to expire this way
+    );
+
+    const creator = createSession({ id: token, expiresAt: expirationDate });
+    creator.then(session => resolve(session));
     creator.catch(err => reject(err));
   });
 }
@@ -30,7 +35,7 @@ export function generateSession(record, createSession) {
  * Takes a valid session token and destroys the associated session.
  *
  * @param  {String}   token         A valid session token.
- * @param  {Function} deleteSession A function for deleting a session in the database.
+ * @param  {Function} deleteSession A dbAPI function for deleting a session in the database.
  *                                  Should return a promise.
  *
  * @return {Promise}                Resolves when the session has been deleted.
@@ -44,37 +49,79 @@ export function destroySession(token, deleteSession) {
 }
 
 /**
+ * Takes a valid session token and updates the associated session.
+ *
+ * @param  {String}   token         A valid session token.
+ * @param  {Function} updateSession A dbAPI function for updating a session in the database.
+ *                                  Should return a promise.
+ *
+ * @return {Promise}                Resolves when the session has been updated.
+ */
+export function modifySession(token, updateSession) {
+  return new Promise((resolve, reject) => {
+
+    const expiration = config.backend.sessionExpiry;
+    const expirationDate = new Date();
+    expirationDate.setHours(expirationDate.getHours() + expiration);
+
+    const modifier = updateSession(token, {
+      updatedAt: null,
+      expiresAt: expirationDate // Restart the countdown to expiration
+    });
+
+    modifier.catch(err => reject(err));
+    modifier.then(updated => resolve(updated));
+  });
+}
+
+/**
  * Takes a session token and determines whether it is valid.
  *
  * @param  {String}   token         A valid session token.
- * @param  {Function} readSession   A function for reading a session from the database.
+ * @param  {Function} readSession   A dbAPI function for reading a session from the database.
  *                                  Should return a promise.
- * @param  {Function} deleteSession A function for deleting a session in the database.
+ * @param  {Function} updateSession A dbAPI function for updating a session in the database.
+ *                                  Should return a promise.
+ * @param  {Function} deleteSession A dbAPI function for deleting a session in the database.
  *                                  Should return a promise.
  *
  * @return {Promise}                Resolves if the session is valid.
  *                                  If it rejects, destroys the session.
  */
-export function validateSession(token, readSession, deleteSession) {
+export function validateSession(token, readSession, updateSession, deleteSession) {
   return new Promise((resolve, reject) => {
     const getter = readSession(token);
 
-    getter.catch(() => {
-      reject();
+    getter.catch(err => {
+      reject(err);
     });
 
     getter.then(session => {
       if (!session) {
-        reject();
+        reject('Session does not exist.');
+
       } else {
-        jwt.verify(session.id, config.backend.dbSecret, err => {
-          if (err) {
-            destroySession(session.id, deleteSession);
-            reject();
-          } else {
-            resolve();
-          }
-        });
+        const expiresAt = new Date(session.expiresAt);
+        const now = new Date();
+
+        // Session has expired if the current time is later than the
+        // expiration time.
+        if (now >= expiresAt) {
+          destroySession(session.id, deleteSession);
+          reject('Session expired.');
+
+        } else {
+          jwt.verify(session.id, config.backend.dbSecret, err => {
+            if (err) {
+              destroySession(session.id, deleteSession);
+              reject(err);
+            } else {
+              modifySession(session.id, updateSession)
+                .catch(err => reject(err))
+                .then(moddedSession => resolve(moddedSession));
+            }
+          });
+        }
       }
     });
 
@@ -111,7 +158,12 @@ export function checkAuth() {
       const token = req.headers.authorization.split(' ')[1];
 
       dbReady((db, models, dbAPI) => {
-        const validator = validateSession(token, dbAPI.readSession, dbAPI.deleteSession);
+        const validator = validateSession(
+          token,
+          dbAPI.readSession,
+          dbAPI.updateSession,
+          dbAPI.deleteSession
+        );
 
         validator.then(() => {
           req.isAuthenticated = true;

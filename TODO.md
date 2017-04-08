@@ -26,4 +26,9 @@
 - [x] expire sessions should find all sessions where created_at is 12 hr less than now
 - [x] Document schedules
 - [x] Useful middlewares?
-- [ ] Test all db API fns
+- [x] de-arrayify update results
+- [x] make sure sessions expire
+- [ ] change the expire schedule to work with new expire methodology
+- [ ] empty out localstorage automatically on logout?
+- [ ] Document + test all db API fns
+- [ ] Test suite?

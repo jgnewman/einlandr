@@ -29,7 +29,7 @@ export default function attachAPI(app, dbAPI) {
       if (result) {
         const creator = generateSession(result, dbAPI.createSession);
         delete result.password;
-        creator.then(token => res.send({ token: token, user: result }));
+        creator.then(session => res.send({ token: session.id, user: result }));
         creator.catch(() => res.sendStatus(500));
       } else {
         res.sendStatus(401);

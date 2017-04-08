@@ -62,6 +62,19 @@ function breakDown(dbResult, options) {
   }
 }
 
+/**
+ * If the provided value is an array, take out the
+ * first item in the array.
+ *
+ * @param  {Any} value  Might be an array.
+ *
+ * @return {Any} The first value in the array if it was an array,
+ *               otherwise the original value.
+ */
+function useHead(value) {
+  return Array.isArray(value) ? value[0] : value;
+}
+
 /****************************
  * Begin exported functions
  ****************************/
@@ -71,6 +84,7 @@ function breakDown(dbResult, options) {
  *
  * @param  {Promise} promise  The original promise from sequelize.
  * @param  {Object}  options  Key(preservePwd:true) will keep pwds in recoreds.
+ *                            Key(useHead:true) will de-arrayify by using only the first value.
  *
  * @return {Promise}          Resolves with simplified values.
  */
@@ -78,6 +92,10 @@ export function simplify(promise, options) {
   options = options || {};
   return new Promise((resolve, reject) => {
     promise.catch(err => reject(err));
-    promise.then(result => resolve(breakDown(result, options)));
+    promise.then(result => {
+      const brokenDown = breakDown(result, options);
+      const cleanResult = options.useHead ? useHead(brokenDown) : brokenDown;
+      resolve(cleanResult);
+    });
   });
 }

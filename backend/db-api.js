@@ -52,7 +52,7 @@ export default function defineAPI(db, models) {
         result[0] ? log(colors.green(`Successfully updated ${key}`))
                   : log(colors.blue('No records were updated.'));
       });
-      return simplify(promise);
+      return simplify(promise, { useHead: true });
     };
 
     // Make a read-by-id function for each model
