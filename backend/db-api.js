@@ -63,6 +63,19 @@ export default function defineAPI(db, models) {
       return promise;
     };
 
+    // Make a delete-all function for each model
+    // BE CAREFUL USING THIS IF YOU HAVE LOTS OF RECORDS!
+    // `where` is an optional object of sequelize attributes
+    api[`deleteAll${key}`] = where => {
+      const promise = models[key].destroy(where ? { where: where } : undefined);
+      promise.catch(err => log(colors.red(err)));
+      promise.then(result => {
+        result ? log(colors.green(`Successfully deleted ${result} ${key} records`))
+               : log(colors.blue('No records were deleted.'));
+      });
+      return promise;
+    };
+
   });
 
   /***********************************

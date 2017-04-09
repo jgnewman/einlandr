@@ -9,19 +9,17 @@ import config from '../config';
  */
 dbReady((db, models, api) => {
   schedule.scheduleJob(config.backend.sessionCleanFrequency, () => {
-    log(colors.yellow('Cleaning sessions...'));
+    log(colors.yellow('Cleaning expired sessions...'));
 
-    api.readAllSession({
-      createdAt: {
-        $lt: new Date(new Date() - config.backend.sessionExpiry * 60 * 60 * 1000)
+    // Expire all sessions whose expiresAt field is less than now.
+    api.deleteAllSession({
+      expiresAt: {
+        $lt: new Date()
       }
-    }).then(sessions => {
-
-      sessions.forEach(session => {
-        log(colors.blue(`Expiring session ${session.id.slice(0, 40)}...`));
-        api.deleteSession(session.id);
-      });
-
+    })
+    .then(result => {
+      log(colors.blue(`Expired ${result} sessions`));
     });
+
   });
 });

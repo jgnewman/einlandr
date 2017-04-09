@@ -106,7 +106,7 @@ Everything you do with Einlandr is run through Yarn commands. These commands wil
 
 Note that these are just example values. You can change them as needed.
 
-## Using up a database
+## Using a database
 
 ### Creation
 

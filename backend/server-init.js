@@ -4,7 +4,7 @@ import brightsocket from 'brightsocket.io';
 import attachMiddlewares from './server-middlewares';
 import attachRoutes from './server-routes';
 import attachNgrok from './server-ngrok';
-import attachSchedules from './server-schedules';
+import { attachSchedules, killSchedules } from './server-schedules';
 import { attachReload, markRefreshing } from '../reloader/server-reloader';
 import attachAPI from './http-api-v1';
 import attachSocketAPI from './socket-api-v1';
@@ -41,5 +41,6 @@ export function stopServer() {
 export function refreshServer() {
   markRefreshing();
   stopServer();
+  killSchedules();
   process.exit(99);
 }

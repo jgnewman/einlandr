@@ -28,7 +28,7 @@
 - [x] Useful middlewares?
 - [x] de-arrayify update results
 - [x] make sure sessions expire
-- [ ] change the expire schedule to work with new expire methodology
-- [ ] empty out localstorage automatically on logout?
-- [ ] Document + test all db API fns
+- [x] change the expire schedule to work with new expire methodology
+- [x] schedules redundantly run on server reload. fix this
+- [ ] Finish documenting + testing all db API fns
 - [ ] Test suite?

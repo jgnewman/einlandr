@@ -4,10 +4,7 @@ import { spawn } from 'child_process';
 import { log, colors } from 'gulp-util';
 import config from '../config';
 
-const childSettings = {
-  stdio: 'inherit',
-  shell: true
-};
+let runningThreads = {};
 
 function getRealSchedules(dirContents) {
   const realSchedules = [];
@@ -22,7 +19,14 @@ function getRealSchedules(dirContents) {
   return realSchedules;
 }
 
-export default function attachSchedules() {
+function logChildOutput(data, name, isErr) {
+  const stringified = data.toString().trim().replace(/^\[\d\d\:\d\d:\d\d\]\s*/, '');
+  if (stringified) {
+    return log(`[${isErr ? colors.red('Error') + ' from ' : ''}${colors.gray(name)}]: ${stringified}`);
+  }
+}
+
+export function attachSchedules() {
   const schedulesDir = path.resolve(__dirname, '../', 'schedules');
   fs.readdir(schedulesDir, (err, result) => {
 
@@ -36,10 +40,21 @@ export default function attachSchedules() {
         config.tmp.schedules = config.tmp.schedules || [];
         config.tmp.schedules.push(file.fileName);
         log(colors.green(`Executing schedule '${colors.cyan(file.fileName)}'...`));
-        const child = spawn(`babel-node ${file.filePath}`, childSettings);
-        child.on('close', code => log(`Child '${colors.cyan(file.fileName)}' exited with code ${code}`));
+        const child = spawn('babel-node', [file.filePath]);
+        child.stdout.on('data', data => logChildOutput(data, file.fileName));
+        child.stderr.on('data', data => logChildOutput(data, file.fileName, true));
+        child.on('exit', code => log(`Child '${colors.cyan(file.fileName)}' exited with code ${code}`));
+        runningThreads[file.fileName] = child;
       });
 
     }
   });
+}
+
+export function killSchedules() {
+  Object.keys(runningThreads).forEach(name => {
+    log(colors.yellow('Killing schedule', name + '...'));
+    runningThreads[name].kill();
+  })
+  runningThreads = {};
 }
