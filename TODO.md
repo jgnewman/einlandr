@@ -31,4 +31,5 @@
 - [x] change the expire schedule to work with new expire methodology
 - [x] schedules redundantly run on server reload. fix this
 - [x] Finish documenting + testing all db API fns
+- [x] Add in session suppression
 - [ ] Test suite?

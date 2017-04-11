@@ -392,6 +392,10 @@ When a user is authenticated, a session is created in the database. Whenever a r
 
 Simultaneously, while the app is running, there is a background process running a schedule that will clean expired sessions out of the database every 12 hours. See [scheduling jobs](#scheduling-jobs). You can adjust the schedule for this particular job in the config under the `sessionCleanFrequency` key.
 
+For most apps this is good enough. But Einlandr goes one step farther toward keeping your Sessions table clean. Imagine a scenario where the expiration job runs every day at noon and midnight. Now imagine that a user creates a new session at 12:01pm. When midnight rolls around, the session won't be deleted because it has a minute left before it can be considered invalid. Assuming the user doesn't attempt to use that token again until the following afternoon, that dead session record will be taking up space in the database for almost another 12 hours until the job runs again at noon.
+
+To combat this pileup of useless records (especially if you want to reduce the frequency of the expiration job), you can set a value for `sessionSuppression` in the config. The default value is 2. What it means is that, for every new session created, Einlandr will attempt to delete up to 2 expired session records from the database. If the value is set to 0, it won't try to do any session suppression. With session suppression, you can keep your old, dead session records to a minimum while still maintaining quick server responses.
+
 ### Websocket API
 
 Because Einlandr uses [Brightsocket.io](https://www.npmjs.com/package/brightsocket.io) for websocket handling (and due to the nature of websockets generally), authentication is a little looser.

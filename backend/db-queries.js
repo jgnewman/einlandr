@@ -96,5 +96,20 @@ export default function defineQueries(db, models) {
     return simplify(promise, { preservePwd: true });
   };
 
+  // Example
+  // Note, this is necessary for authentication to work.
+  queries.suppressSession = (amount = 2) => {
+    const promise = modlels.Session.destroy({
+      limit: amount,
+      where: { expiresAt: { $lt: new Date() } }
+    });
+    promise.catch(err => log(colors.red(err)));
+    promise.then(result => {
+      result ? log(colors.green(`Successfully deleted ${result} Session records`))
+             : log(colors.blue('No records were deleted.'));
+    });
+    return promise;
+  };
+
   return queries;
 }

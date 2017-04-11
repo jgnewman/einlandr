@@ -42,6 +42,7 @@ const config = {
     // Session specific values
     sessionExpiry: 12, // This number is in hours since last use
     sessionCleanFrequency: '0 */12 * * *', // Should be in cron format (every 12 hours)
+    sessionSuppression: 2, // An amount of expired sessions to delete for evey new session
 
     // Database specific values
     dbEnabled: true,

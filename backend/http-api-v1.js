@@ -27,7 +27,7 @@ export default function attachAPI(app, queries) {
   app.post('/api/v1/authentication/', (req, res) => {
     queries.authUser(req.body.email, req.body.password).then(result => {
       if (result) {
-        const creator = generateSession(result, queries.createSession);
+        const creator = generateSession(result, queries.createSession, queries.suppressSession);
         delete result.password;
         creator.then(session => res.send({ token: session.id, user: result }));
         creator.catch(() => res.sendStatus(500));

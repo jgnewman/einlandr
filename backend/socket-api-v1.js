@@ -17,7 +17,7 @@ export default function attachSocketAPI(socketServer, queries) {
          // a new session.
          .then(result => {
            if (result) {
-             const creator = generateSession(result, queries.createSession);
+             const creator = generateSession(result, queries.createSession, queries.suppressSession);
              delete result.password;
 
              // When the new session is made, send back AUTHENTICATED and

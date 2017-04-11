@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import { log } from 'gulp-util';
 import dbReady from './db-init';
 import config from '../config';
 
@@ -6,15 +7,18 @@ import config from '../config';
  * Takes a valid user record and generates a new session based
  * on that record.
  *
- * @param  {Object}   record        A valid user record.
- * @param  {Function} createSession A db query function for creating a session in the database.
- *                                  Should return a promise.
+ * @param  {Object}   record          A valid user record.
+ * @param  {Function} createSession   A db query function for creating a session in the database.
+ *                                    Should return a promise.
+ * @param  {Function} suppressSession A db query function for suppressing sessions in the database.
+ *                                    Should return a promise.
  *
- * @return {Promise}                Resolves when the session has been created.
+ * @return {Promise}                  Resolves when the session has been created.
  */
-export function generateSession(record, createSession) {
+export function generateSession(record, createSession, suppressSession) {
   return new Promise((resolve, reject) => {
 
+    const suppression = config.backend.sessionSuppression;
     const expiration = config.backend.sessionExpiry;
     const expirationDate = new Date();
     expirationDate.setHours(expirationDate.getHours() + expiration);
@@ -26,8 +30,14 @@ export function generateSession(record, createSession) {
     );
 
     const creator = createSession({ id: token, expiresAt: expirationDate });
-    creator.then(session => resolve(session));
     creator.catch(err => reject(err));
+    creator.then(session => {
+
+      // Remove some amount of sessions for every new session we create.
+      // Don't let it slow us down from resolving if the creation was successful.
+      suppression && suppressSession(suppression);
+      resolve(session);
+    });
   });
 }
 
@@ -229,14 +239,14 @@ export function applyAuth(manifest) {
       next();
     } else {
       if (!matches(req.url, required)) {
-        console.log(`REQUEST -- ${req.url} does not require authentication.`);
+        log(`REQUEST -- ${req.url} does not require authentication.`);
         next();
       } else {
         if (matches(req.url, bypassed)) {
-          console.log(`REQUEST -- ${req.url} allows authentication bypass.`);
+          log(`REQUEST -- ${req.url} allows authentication bypass.`);
           next();
         } else {
-          console.log(`REQUEST -- ${req.url} requires authentication. Request denied.`);
+          log(`REQUEST -- ${req.url} requires authentication. Request denied.`);
           res.sendStatus(401);
         }
       }
