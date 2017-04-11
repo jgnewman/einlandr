@@ -154,12 +154,12 @@ The migration command is `yarn dev:migrate` for development environments or `yar
 
 In order to make using the http API and websocket API easy, you'll want to simplify how these layers access your database. Sequelize can often be verbose and it's good to put a layer of abstraction over it for some of your more complicated queries.
 
-To do that, open up the file backend/db-api.js and locate the area labeled "Define the rest of your API here". Follow the pattern you see below for the `authUser` function. Note that `create<ModelName>, read<ModelName>, update<ModelName>, delete<ModelName>` functions have automatically been created for each of your models.
+To do that, open up the file backend/db-queries.js and locate the area labeled "Define the rest of your queries here". Follow the pattern you see below for the `authUser` function. Note that `create<ModelName>, read<ModelName>, update<ModelName>, delete<ModelName>` functions have automatically been created for each of your models.
 
 ```javascript
-// Create a function on the DB API called authUser.
+// Create a query called authUser.
 // It takes an email string and a password string.
-api.authUser = (email, password) => {
+queries.authUser = (email, password) => {
 
   // Use sequelize to locate a user record where
   // the username/password values match.
@@ -184,7 +184,7 @@ api.authUser = (email, password) => {
 };
 ```
 
-You will have this database API available to you when defining both your http API and your websocket API.
+You will have the database queries available to you when defining both your http API and your websocket API.
 
 ## Exposing a dev app to the internet
 
@@ -229,13 +229,13 @@ import schedule from 'node-schedule';
 import dbReady from '../backend/db-init';
 
 // Establish a database connection
-dbReady((db, models, api) => {
+dbReady((db, models, queries) => {
 
   // Schedule a job to run every minute
   schedule.scheduleJob('0 * * * * *', () => {
 
     // Read the first user from the database and log it
-    api.readUser(1).then(user => console.log(user));
+    queries.readUser(1).then(user => console.log(user));
   });
 });
 ```
@@ -255,13 +255,13 @@ Notice that 3 routes have already been created for you: one for logging in, one 
 app.get('/api/v1/users/:id', (req, res) => {
 
   // Call readUser from the db api.
-  dbAPI.readUser(req.params.id)
+  queries.readUser(req.params.id)
 
-       // If we got a result, send it back out.
-       .then(result => { res.send(result) })
+         // If we got a result, send it back out.
+         .then(result => { res.send(result) })
 
-       // If something went wrong, send a 404 instead.
-       .catch(() => { res.sendStatus(404) });
+         // If something went wrong, send a 404 instead.
+         .catch(() => { res.sendStatus(404) });
 });
 ```
 
@@ -290,16 +290,16 @@ Within the first area, an example of how you might write an API call using webso
 // we'll expect the payload to have a userId property.
 connection.receive('GET_USER', payload => {
 
-  // Use the database API to read a user by id.
-  dbAPI.readUser(payload.userId)
+  // Use the database queries to read a user by id.
+  queries.readUser(payload.userId)
 
-       // If it's successful, send the result to the user as
-       // a USER_RECORD action. The client side should listen for
-       // this action and handle the result when it comes in.
-       .then(result => connection.send('USER_RECORD', result))
+         // If it's successful, send the result to the user as
+         // a USER_RECORD action. The client side should listen for
+         // this action and handle the result when it comes in.
+         .then(result => connection.send('USER_RECORD', result))
 
-       // If it didn't work, send the NOT_FOUND action instead.
-       .catch(result => connection.send('NOT_FOUND'));
+         // If it didn't work, send the NOT_FOUND action instead.
+         .catch(result => connection.send('NOT_FOUND'));
 });
 ```
 

@@ -3,14 +3,14 @@ import { log, colors } from 'gulp-util';
 import { simplify } from './db-utils';
 
 
-export default function defineAPI(db, models) {
-  const api = {};
+export default function defineQueries(db, models) {
+  const queries = {};
 
   // Automatically handle CRUD operations for each model
   Object.keys(models).forEach(key => {
 
     // Make a create function for each model
-    api[`create${key}`] = values => {
+    queries[`create${key}`] = values => {
       const promise = models[key].create(values);
       promise.catch(err => log(colors.red(err)));
       promise.then(() => log(colors.green(`Successfully created ${key}`)));
@@ -18,7 +18,7 @@ export default function defineAPI(db, models) {
     };
 
     // Make a read-by-id function for each model
-    api[`read${key}`] = primaryKey => {
+    queries[`read${key}`] = primaryKey => {
       const promise = models[key].findById(primaryKey);
       promise.catch(err => log(colors.red(err)));
       promise.then(result => {
@@ -31,7 +31,7 @@ export default function defineAPI(db, models) {
     // Make a read-all function for each model
     // BE CAREFUL USING THIS IF YOU HAVE LOTS OF RECORDS!
     // `where` is an optional object of sequelize attributes
-    api[`readAll${key}`] = where => {
+    queries[`readAll${key}`] = where => {
       const promise = models[key].findAll(where ? { where: where } : undefined);
       promise.catch(err => log(colors.red(err)));
       promise.then(result => {
@@ -42,7 +42,7 @@ export default function defineAPI(db, models) {
     };
 
     // Make an update-by-id function for each model
-    api[`update${key}`] = (primaryKey, values) => {
+    queries[`update${key}`] = (primaryKey, values) => {
       const promise = models[key].update(values, {
         where: { id: primaryKey },
         returning: true
@@ -56,7 +56,7 @@ export default function defineAPI(db, models) {
     };
 
     // Make a read-by-id function for each model
-    api[`delete${key}`] = primaryKey => {
+    queries[`delete${key}`] = primaryKey => {
       const promise = models[key].destroy({ where: { id: primaryKey } });
       promise.catch(err => log(colors.red(err)));
       promise.then(() => log(colors.green(`Successfully deleted ${key}`)));
@@ -66,7 +66,7 @@ export default function defineAPI(db, models) {
     // Make a delete-all function for each model
     // BE CAREFUL USING THIS IF YOU HAVE LOTS OF RECORDS!
     // `where` is an optional object of sequelize attributes
-    api[`deleteAll${key}`] = where => {
+    queries[`deleteAll${key}`] = where => {
       const promise = models[key].destroy(where ? { where: where } : undefined);
       promise.catch(err => log(colors.red(err)));
       promise.then(result => {
@@ -78,13 +78,13 @@ export default function defineAPI(db, models) {
 
   });
 
-  /***********************************
-   * Define the rest of your API here
-   ***********************************/
+  /***************************************
+   * Define the rest of your queries here
+   ***************************************/
 
   // Example
   // Note, this is necessary for authentication to work.
-  api.authUser = (email, password) => {
+  queries.authUser = (email, password) => {
     const promise = models.User.findOne({
       where: { email: email, password: password }
     });
@@ -96,5 +96,5 @@ export default function defineAPI(db, models) {
     return simplify(promise, { preservePwd: true });
   };
 
-  return api;
+  return queries;
 }

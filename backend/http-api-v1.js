@@ -4,7 +4,7 @@ import {
   destroySession
 } from './server-auth';
 
-export default function attachAPI(app, dbAPI) {
+export default function attachAPI(app, queries) {
 
   // Make sure authentication requirements are properly applied
   // to the following routes.
@@ -25,9 +25,9 @@ export default function attachAPI(app, dbAPI) {
   // Log a user in
   // Return a session id
   app.post('/api/v1/authentication/', (req, res) => {
-    dbAPI.authUser(req.body.email, req.body.password).then(result => {
+    queries.authUser(req.body.email, req.body.password).then(result => {
       if (result) {
-        const creator = generateSession(result, dbAPI.createSession);
+        const creator = generateSession(result, queries.createSession);
         delete result.password;
         creator.then(session => res.send({ token: session.id, user: result }));
         creator.catch(() => res.sendStatus(500));
@@ -42,7 +42,7 @@ export default function attachAPI(app, dbAPI) {
   // Log a user out
   app.post('/api/v1/authentication/logout', (req, res) => {
     const token = req.body.token;
-    const destroyer = destroySession(token, dbAPI.deleteSession);
+    const destroyer = destroySession(token, queries.deleteSession);
     destroyer.then(() => res.sendStatus(200));
     destroyer.catch(() => res.sendStatus(500));
   });
@@ -52,9 +52,9 @@ export default function attachAPI(app, dbAPI) {
    *******************************************/
 
   app.get('/api/v1/users/:id', (req, res) => {
-    dbAPI.readUser(req.params.id)
-         .then(result => { res.send(result) })
-         .catch(() => { res.sendStatus(404) });
+    queries.readUser(req.params.id)
+           .then(result => { res.send(result) })
+           .catch(() => { res.sendStatus(404) });
   });
 
   /*******************************************

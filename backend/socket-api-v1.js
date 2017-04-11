@@ -2,7 +2,7 @@ import { validateSession, generateSession } from './server-auth';
 import { log, colors } from 'gulp-util';
 
 
-export default function attachSocketAPI(socketServer, dbAPI) {
+export default function attachSocketAPI(socketServer, queries) {
 
   // Users will connect to the AUTHENTICATION channel and pass us a
   // username and password.
@@ -10,14 +10,14 @@ export default function attachSocketAPI(socketServer, dbAPI) {
     log(colors.yellow('User requesting authentication...'));
     console.log(identity.email, identity.password);
     // We'll attempt to authenticate the identity.
-    dbAPI.authUser(identity.email, identity.password)
+    queries.authUser(identity.email, identity.password)
 
          // In the event of a successful authentication,
          // make sure we have a real result. If so, create
          // a new session.
          .then(result => {
            if (result) {
-             const creator = generateSession(result, dbAPI.createSession);
+             const creator = generateSession(result, queries.createSession);
              delete result.password;
 
              // When the new session is made, send back AUTHENTICATED and
@@ -64,9 +64,9 @@ export default function attachSocketAPI(socketServer, dbAPI) {
     connection.addFilter((action, payload, next) => {
       const validator = validateSession(
         payload.sessionId,
-        dbAPI.readSession,
-        dbAPI.updateSession,
-        dbAPI.deleteSession
+        queries.readSession,
+        queries.updateSession,
+        queries.deleteSession
       );
       validator.then(() => next());
       validator.catch(() => connection.send('UNAUTHORIZED'));
@@ -78,9 +78,9 @@ export default function attachSocketAPI(socketServer, dbAPI) {
 
     // Example.
     // connection.receive('GET_USER', payload => {
-    //   dbAPI.readUser(payload.userId)
-    //        .then(result => connection.send('USER_RECORD', result))
-    //        .catch(result => connection.send('NOT_FOUND'));
+    //   queries.readUser(payload.userId)
+    //          .then(result => connection.send('USER_RECORD', result))
+    //          .catch(result => connection.send('NOT_FOUND'));
     // });
 
   });

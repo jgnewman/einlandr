@@ -7,7 +7,7 @@ import config from '../config';
  * on that record.
  *
  * @param  {Object}   record        A valid user record.
- * @param  {Function} createSession A dbAPI function for creating a session in the database.
+ * @param  {Function} createSession A db query function for creating a session in the database.
  *                                  Should return a promise.
  *
  * @return {Promise}                Resolves when the session has been created.
@@ -35,7 +35,7 @@ export function generateSession(record, createSession) {
  * Takes a valid session token and destroys the associated session.
  *
  * @param  {String}   token         A valid session token.
- * @param  {Function} deleteSession A dbAPI function for deleting a session in the database.
+ * @param  {Function} deleteSession A db query function for deleting a session in the database.
  *                                  Should return a promise.
  *
  * @return {Promise}                Resolves when the session has been deleted.
@@ -52,7 +52,7 @@ export function destroySession(token, deleteSession) {
  * Takes a valid session token and updates the associated session.
  *
  * @param  {String}   token         A valid session token.
- * @param  {Function} updateSession A dbAPI function for updating a session in the database.
+ * @param  {Function} updateSession A db query function for updating a session in the database.
  *                                  Should return a promise.
  *
  * @return {Promise}                Resolves when the session has been updated.
@@ -78,11 +78,11 @@ export function modifySession(token, updateSession) {
  * Takes a session token and determines whether it is valid.
  *
  * @param  {String}   token         A valid session token.
- * @param  {Function} readSession   A dbAPI function for reading a session from the database.
+ * @param  {Function} readSession   A db query function for reading a session from the database.
  *                                  Should return a promise.
- * @param  {Function} updateSession A dbAPI function for updating a session in the database.
+ * @param  {Function} updateSession A db query function for updating a session in the database.
  *                                  Should return a promise.
- * @param  {Function} deleteSession A dbAPI function for deleting a session in the database.
+ * @param  {Function} deleteSession A db query function for deleting a session in the database.
  *                                  Should return a promise.
  *
  * @return {Promise}                Resolves if the session is valid.
@@ -157,12 +157,12 @@ export function checkAuth() {
     if (typeof req.headers.authorization === 'string') {
       const token = req.headers.authorization.split(' ')[1];
 
-      dbReady((db, models, dbAPI) => {
+      dbReady((db, models, queries) => {
         const validator = validateSession(
           token,
-          dbAPI.readSession,
-          dbAPI.updateSession,
-          dbAPI.deleteSession
+          queries.readSession,
+          queries.updateSession,
+          queries.deleteSession
         );
 
         validator.then(() => {
