@@ -128,7 +128,9 @@ export function validateSession(token, readSession, updateSession, deleteSession
             } else {
               modifySession(session.id, updateSession)
                 .catch(err => reject(err))
-                .then(moddedSession => resolve(moddedSession));
+                .then(moddedSession => {
+                  resolve(moddedSession);
+                });
             }
           });
         }

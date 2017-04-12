@@ -98,7 +98,7 @@ export default function defineQueries(db, models) {
   // Example
   // Note, this is necessary for authentication to work.
   queries.suppressSession = (amount = 2) => {
-    const promise = modlels.Session.destroy({
+    const promise = models.Session.destroy({
       limit: amount,
       where: { expiresAt: { $lt: new Date() } }
     });

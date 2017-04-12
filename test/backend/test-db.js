@@ -1,6 +1,10 @@
 import assert from 'assert';
 import { log } from 'gulp-util';
 import dbReady from '../../backend/db-init';
+import config from '../../config';
+import { generateSession, validateSession } from '../../backend/server-auth';
+
+const origSuppression = config.backend.sessionSuppression;
 
 describe('Database', function () {
 
@@ -88,5 +92,235 @@ describe('Database', function () {
     });
 
   });
+
+  describe('Session Handling', function () {
+    let createdUserId;
+    let createdSessionId;
+    let createdSessionExpires;
+
+    it('should create a session', function (done) {
+      dbReady(queries => {
+
+        queries.createUser({
+          firstName: 'Test',
+          lastName: 'User',
+          email: 'testuser@testuser.com',
+          password: 'password'
+        })
+        .then(user => {
+          createdUserId = user.id;
+          config.backend.sessionSuppression = 0;
+          generateSession(
+            user,
+            queries.createSession,
+            queries.suppressSession
+          ).then(session => {
+            createdSessionId = session.id;
+            createdSessionExpires = session.expiresAt;
+            config.backend.sessionSuppression = origSuppression;
+            assert.ok(session.id);
+            assert.ok(session.expiresAt);
+            queries.deleteUser(createdUserId).then(() => {
+              done();
+            });
+          });
+        });
+
+      });
+    });
+
+    it('should validate/update a session', function (done) {
+      dbReady(queries => {
+
+        validateSession(
+          createdSessionId,
+          queries.readSession,
+          queries.updateSession,
+          queries.deleteSession
+        ).then(session => {
+          assert.equal(session.id, createdSessionId);
+          assert.notEqual(session.expiresAt, createdSessionExpires);
+          queries.deleteSession(createdSessionId).then(() => {
+            done();
+          });
+        });
+
+      });
+    });
+
+    it('should delete an invalid session', function (done) {
+      dbReady(queries => {
+
+        queries.createUser({
+          firstName: 'Test',
+          lastName: 'User',
+          email: 'testuser@testuser.com',
+          password: 'password'
+        }).then(user => {
+          createdUserId = user.id;
+          config.backend.sessionSuppression = 0;
+          generateSession(
+            user,
+            queries.createSession,
+            queries.suppressSession
+          ).then(session => {
+            const now = new Date();
+            now.setHours(now.getHours() - 1000);
+            createdSessionId = session.id;
+            createdSessionExpires = session.expiresAt;
+            config.backend.sessionSuppression = origSuppression;
+            queries.updateSession(session.id, { expiresAt: now }).then(updated => {
+              validateSession(
+                session.id,
+                queries.readSession,
+                queries.updateSession,
+                queries.deleteSession
+              ).catch(() => {
+                queries.deleteUser(createdUserId).then(() => {
+                  queries.readSession(session.id).then(nothing => {
+                    assert.equal(nothing, null);
+                    done();
+                  });
+                });
+              });
+            });
+          });
+        });
+
+      });
+    });
+
+    it('should suppress dead sessions', function (done) {
+      dbReady(queries => {
+        const userList = [];
+        const sessionList = [];
+        const now = new Date();
+
+        // We'll use this date to artificially expire some sessions
+        now.setHours(now.getHours() - 1000);
+        config.backend.sessionSuppression = 0;
+
+        // Make and track 3 users
+        function makeUsers(callback) {
+          queries.createUser({
+            firstName: 'Test',
+            lastName: 'User',
+            email: Math.random() + '@testuser.com',
+            password: 'password'
+          }).then(user => {
+            userList.push(user);
+            if (userList.length < 3) {
+              makeUsers(callback);
+            } else {
+              callback();
+            }
+          });
+        }
+
+        // Make and track 3 sessions
+        function makeSessions(callback) {
+          userList.forEach(user => {
+            generateSession(
+              user,
+              queries.createSession,
+              queries.suppressSession
+            ).then(session => {
+              sessionList.push(session);
+              if (sessionList.length === userList.length) {
+                callback();
+              }
+            });
+          });
+        }
+
+        // Artificially expire all 3 sessions
+        function updateSessions(callback) {
+          let finished = 0;
+          sessionList.forEach(session => {
+            queries.updateSession(session.id, { expiresAt: now }).then(() => {
+              finished ++;
+              if (finished === sessionList.length) {
+                callback();
+              }
+            });
+          });
+        }
+
+        // Delete all the users we've made in this test
+        function deleteUsers(callback) {
+          let finished = 0;
+          userList.forEach(user => {
+            queries.deleteUser(user.id).then(() => {
+              finished ++;
+              if (finished === userList.length) {
+                callback();
+              }
+            });
+          });
+        }
+
+        // Delete all the sessions we've made in this test
+        function deleteSessions(callback) {
+          let finished = 0;
+          sessionList.forEach(session => {
+            queries.deleteSession(session.id).then(() => {
+              finished ++;
+              if (finished === sessionList.length) {
+                callback();
+              }
+            });
+          });
+        }
+
+        makeUsers(() => {
+          makeSessions(() => {
+            updateSessions(() => {
+              // Make sure we expect 2 of 3 dead sessions to be removed
+              config.backend.sessionSuppression = 2;
+
+              // Create a 4th user and a related session
+              queries.createUser({
+                firstName: 'Test',
+                lastName: 'User',
+                email: Math.random() + '@testuser.com',
+                password: 'password'
+              }).then(user => {
+                userList.push(user);
+                generateSession(
+                  user,
+                  queries.createSession,
+                  queries.suppressSession
+                ).then(session => {
+                  sessionList.push(session);
+
+                  // If 2 sessions expired, there should be 1 left over with the
+                  // correct expiresAt field
+                  queries.readAllSession({ expiresAt: now}).then(stillThere => {
+                    assert.equal(stillThere.length, 1);
+
+                    // Clean up
+                    config.backend.sessionSuppression = origSuppression;
+                    deleteUsers(() => {
+                      deleteSessions(() => {
+                       done();
+                      });
+                    });
+                  });
+                });
+              });
+
+
+            });
+          });
+        });
+
+      });
+    });
+
+  });
+
+  /***************************************
+   * Describe more tests here
+   ***************************************/
 
 });
