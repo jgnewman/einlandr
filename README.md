@@ -626,3 +626,4 @@ Everything you do when working with Einlandr will be executed via Yarn commands.
 - `$ yarn prod:migrate` - Clean and seed the production database
 - `$ yarn layer <name>` - Generate a new layer to the React app (see [Adding a new React Layer](#adding-a-new-react-layer))
 - `$ yarn component <name>` - Generate a single React component.
+- `$ yarn test` - Launches Einlandr's unit tests using the dev environment.

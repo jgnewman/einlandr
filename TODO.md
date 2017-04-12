@@ -32,5 +32,4 @@
 - [x] schedules redundantly run on server reload. fix this
 - [x] Finish documenting + testing all db API fns
 - [x] Add in session suppression
-- [ ] Email validation on create/update user
-- [ ] Test suite?
+- [ ] More unit tests
