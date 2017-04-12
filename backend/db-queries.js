@@ -1,4 +1,3 @@
-import dbReady from './db-init';
 import { log, colors } from 'gulp-util';
 import { simplify } from './db-utils';
 

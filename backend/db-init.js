@@ -78,7 +78,7 @@ function dbConnect() {
       db = tempDB;
       models = defineModels(tempDB);
       queries = defineQueries(tempDB, models);
-      connectHooks.forEach(hook => hook(tempDB, models, queries));
+      connectHooks.forEach(hook => hook(queries, models, tempDB));
     });
 
     authenticated.catch(err => {
@@ -107,7 +107,7 @@ export default function dbReady(hook) {
   if (config.backend.dbEnabled) {
 
     // If we're already connected, execute hook.
-    connected && hook && hook(db, models, queries);
+    connected && hook && hook(queries, models, db);
 
     // Otherwise, push the hook into the queue.
     !connected && hook && connectHooks.push(hook);

@@ -9,7 +9,7 @@ function create(model, values, logMsg) {
 }
 
 export default function migrate(callback) {
-  dbReady((db, models) => {
+  dbReady((queries, models, db) => {
     log(colors.cyan('Migrating database...'));
 
     // Drop existing tables and create schema

@@ -229,7 +229,7 @@ import schedule from 'node-schedule';
 import dbReady from '../backend/db-init';
 
 // Establish a database connection
-dbReady((db, models, queries) => {
+dbReady(queries => {
 
   // Schedule a job to run every minute
   schedule.scheduleJob('0 * * * * *', () => {

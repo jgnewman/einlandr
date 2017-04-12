@@ -17,11 +17,12 @@
     "prod:migrate": ". env-prod && gulp db:migrate",
     "layer": "node layermaker/makelayer",
     "component": "node layermaker/makecomponent",
-    "test": ""
+    "test": ". env-dev && gulp test:main"
   },
   "author": "John Newman <rescuecreative@gmail.com>",
   "license": "MIT",
   "dependencies": {
+    "assert": "^1.4.1",
     "axios": "^0.15.3",
     "babel": "^6.23.0",
     "babel-cli": "^6.24.0",
@@ -41,6 +42,7 @@
     "gulp-clean-css": "^3.0.4",
     "gulp-concat": "^2.6.1",
     "gulp-if": "^2.0.2",
+    "gulp-mocha": "^4.3.0",
     "gulp-mustache": "^2.3.0",
     "gulp-sass": "^3.1.0",
     "gulp-sourcemaps": "^2.5.0",

@@ -7,6 +7,7 @@ import './tasks/style-tasks';
 import './tasks/js-tasks';
 import './tasks/template-tasks';
 import './tasks/db-tasks';
+import './tasks/test-tasks';
 
 
 gulp.task('up', ['scss:main', 'js:main', 'templates:main', 'server:main'], () => {

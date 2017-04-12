@@ -167,7 +167,7 @@ export function checkAuth() {
     if (typeof req.headers.authorization === 'string') {
       const token = req.headers.authorization.split(' ')[1];
 
-      dbReady((db, models, queries) => {
+      dbReady(queries => {
         const validator = validateSession(
           token,
           queries.readSession,

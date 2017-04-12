@@ -11,10 +11,10 @@ If you need to establish a connection elsewhere, import the `dbReady` function f
 ```javascript
 import dbReady from 'path/to/backend/db-init';
 
-dbReady((db, models, queries) => { ... });
+dbReady((queries, models, db) => { ... });
 ```
 
-When calling `dbReady`, you'll get access to the database instance itself, all of your defined models, and, of course, the database queries, which are what this file is concerned with documenting.
+When calling `dbReady`, you'll get access to all the database queries as well as all of your defined models and the database instance itself. This file is concerned with documenting just the queries.
 
 ## Extending database queries
 
