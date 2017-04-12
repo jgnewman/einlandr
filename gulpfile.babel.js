@@ -1,6 +1,6 @@
 import gulp from 'gulp';
 import { log, colors } from 'gulp-util';
-import { finishRefreshing } from './reloader/server-reloader';
+import { finishRefreshing } from './utilities/reloader/server-reloader';
 import config from './config';
 import './tasks/server-tasks';
 import './tasks/style-tasks';

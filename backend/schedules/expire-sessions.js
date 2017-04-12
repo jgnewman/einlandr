@@ -1,7 +1,7 @@
 import schedule from 'node-schedule';
 import { log, colors } from 'gulp-util';
-import dbReady from '../backend/db-init';
-import config from '../config';
+import dbReady from '../db-init';
+import config from '../../config';
 
 /**
  * Recurs as a cron job and cleans out invalid sessions

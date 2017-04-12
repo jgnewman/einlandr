@@ -7,7 +7,7 @@ import uglify from 'gulp-uglify';
 import gulpif from 'gulp-if';
 import source from 'vinyl-source-stream';
 import buffer from 'vinyl-buffer';
-import { prepReload } from '../reloader/server-reloader';
+import { prepReload } from '../utilities/reloader/server-reloader';
 import config from '../config';
 
 

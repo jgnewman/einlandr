@@ -13,7 +13,7 @@ function makeStyles(names, callback) {
   timer.start();
   log('Starting', colors.cyan('new style layer') + '...');
 
-  stylesDir = path.resolve(__dirname, '../', 'frontend', 'src', 'scss');
+  stylesDir = path.resolve(__dirname, '../', '../', 'frontend', 'src', 'scss');
   stylesIndex = path.resolve(stylesDir, 'index.scss');
   newFileName = path.resolve(stylesDir, names.scssFile);
   newFileContents = names.scssSelector + ' {\n\n}';

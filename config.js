@@ -31,12 +31,11 @@ const config = {
     serverPort: process.env.SERVER_PORT,
     serverSource: [
       './*', // Glob top level files but not protected directories
-      '!./{frontend,layermaker,.git,node_modules}',
+      '!./{frontend,.git,node_modules}',
 
-      './tasks/**/*',    // gulp tasks
-      './backend/**/*',  // backend files
-      './reloader/**/*', // reloader files
-      './schedules/**/*' // schedule files
+      './tasks/**/*',     // gulp tasks
+      './backend/**/*',   // backend files
+      './utilities/**/*', // utility files
     ],
 
     // Session specific values

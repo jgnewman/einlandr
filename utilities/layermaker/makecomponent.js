@@ -24,7 +24,7 @@ var names = {
   component: componentNameCapital,
   state: componentName,
   file: componentNameCapital + '.js',
-  filePath: path.resolve(__dirname, '../', 'frontend', 'src', 'js', 'components', componentNameCapital + '.js')
+  filePath: path.resolve(__dirname, '../', '../', 'frontend', 'src', 'js', 'components', componentNameCapital + '.js')
 };
 
 var template = makeComponentTemplate(names);

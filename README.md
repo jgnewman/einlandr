@@ -154,7 +154,7 @@ The migration command is `yarn dev:migrate` for development environments or `yar
 
 In order to make using the http API and websocket API easy, you'll want to simplify how these layers access your database. Sequelize can often be verbose and it's good to put a layer of abstraction over it for some of your more complicated queries.
 
-To do that, open up the file backend/db-queries.js and locate the area labeled "Define the rest of your queries here". Follow the pattern you see below for the `authUser` function. Note that `create<ModelName>, read<ModelName>, update<ModelName>, delete<ModelName>` functions have automatically been created for each of your models.
+To do that, open up the file backend/db-queries.js and locate the area labeled "Define the rest of your queries here". Follow the pattern you see below for the `authUser` function. Note that `create<ModelName>, read<ModelName>, update<ModelName>, delete<ModelName>` functions have automatically been created for each of your models. To learn more about them, checkout [their documentation](./db-queries.md).
 
 ```javascript
 // Create a query called authUser.
@@ -214,7 +214,7 @@ Within this file, you'll see that lots of yummy middleware is already being appl
 
 ## Scheduling jobs
 
-Einlandr comes packaged with a built-in scheduler using [node-schedule](https://www.npmjs.com/package/node-schedule). To create a scheduled job, simply add a new file to the "schedules" directory. When the server starts up, each file in this directory will be launched in a child_process so that when jobs run, they won't block events on the main thread.
+Einlandr comes packaged with a built-in scheduler using [node-schedule](https://www.npmjs.com/package/node-schedule). To create a scheduled job, simply add a new file to the "backend/schedules" directory. When the server starts up, each file in this directory will be launched in a child_process so that when jobs run, they won't block events on the main thread.
 
 In order to user node-schedule you may want to be familiar with cron format. However, there are plenty of more semantic ways to schedule jobs though none are quite as concise.
 
@@ -222,7 +222,7 @@ Here is an example of a scheduled job that will run once every minute. Feel free
 
 ```javascript
 // Start by creating example.js and putting it
-// in the schedules directory. Here are the
+// in the backend/schedules directory. Here are the
 // contents of that file...
 
 import schedule from 'node-schedule';

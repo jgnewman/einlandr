@@ -5,7 +5,7 @@ import sass from 'gulp-sass';
 import cleanCSS from 'gulp-clean-css';
 import sourcemaps from 'gulp-sourcemaps';
 import gulpif from 'gulp-if';
-import { prepReload } from '../reloader/server-reloader';
+import { prepReload } from '../utilities/reloader/server-reloader';
 import config from '../config';
 
 /**

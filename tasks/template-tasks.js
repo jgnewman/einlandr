@@ -2,8 +2,8 @@ import gulp from 'gulp';
 import { log, colors } from 'gulp-util';
 import clean from 'gulp-clean';
 import mustache from 'gulp-mustache';
-import { prepReload } from '../reloader/server-reloader';
-import getReloadTemplate from '../reloader/browser-reloader';
+import { prepReload } from '../utilities/reloader/server-reloader';
+import getReloadTemplate from '../utilities/reloader/browser-reloader';
 import config from '../config';
 
 

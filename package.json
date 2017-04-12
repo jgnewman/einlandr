@@ -15,8 +15,8 @@
     "prod": ". env-prod && node index",
     "dev:migrate": ". env-dev && gulp db:migrate",
     "prod:migrate": ". env-prod && gulp db:migrate",
-    "layer": "node layermaker/makelayer",
-    "component": "node layermaker/makecomponent",
+    "layer": "node utilities/layermaker/makelayer",
+    "component": "node utilities/layermaker/makecomponent",
     "test": ". env-dev && gulp test:main"
   },
   "author": "John Newman <rescuecreative@gmail.com>",
