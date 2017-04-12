@@ -22,9 +22,14 @@ gulp.task('server:start', next => {
 /**
  * Watch files and restart when they change
  */
-gulp.task('server:watch', () => { 
+gulp.task('server:watch', () => {
   const watch = gulp.watch(config.backend.serverSource, ['server:refresh']);
   watch.on('change', event => {
     log(colors.yellow('Server file change'), "'" + colors.cyan(event.path) + "'");
   });
 });
+
+/**
+ * Main server task
+ */
+gulp.task('server:main', ['server:start', 'server:watch']);

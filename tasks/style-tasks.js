@@ -37,3 +37,8 @@ gulp.task('scss:watch', ['scss:compile'], () => {
     log(colors.yellow('Style change'), "'" + colors.cyan(event.path) + "'");
   });
 });
+
+/**
+ * Main style task
+ */
+gulp.task('scss:main', ['scss:clean', 'scss:compile', 'scss:watch']);

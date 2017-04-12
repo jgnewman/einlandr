@@ -35,3 +35,8 @@ gulp.task('templates:watch', ['templates:compile'], () => {
     log(colors.yellow('Template change'), "'" + colors.cyan(event.path) + "'");
   });
 });
+
+/**
+ * Main template task
+ */
+gulp.task('templates:main', ['templates:clean', 'templates:compile', 'templates:watch'])

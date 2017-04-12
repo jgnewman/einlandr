@@ -8,15 +8,8 @@ import './tasks/js-tasks';
 import './tasks/template-tasks';
 import './tasks/db-tasks';
 
-gulp.task('scss', ['scss:clean', 'scss:compile', 'scss:watch']);
 
-gulp.task('js', ['js:clean', 'js:compile', 'js:watch']);
-
-gulp.task('templates', ['templates:clean', 'templates:compile', 'templates:watch'])
-
-gulp.task('serve', ['server:start', 'server:watch']);
-
-gulp.task('up', ['scss', 'js', 'templates', 'serve'], () => {
+gulp.task('up', ['scss:main', 'js:main', 'templates:main', 'server:main'], () => {
 
   log(colors.blue('********'), colors.green(`App is alive!`), colors.blue('********'));
   log(colors.gray(`-- Environment       | ${colors.cyan(config.env)}`));

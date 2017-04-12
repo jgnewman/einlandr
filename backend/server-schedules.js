@@ -20,10 +20,13 @@ function getRealSchedules(dirContents) {
 }
 
 function logChildOutput(data, name, isErr) {
-  const stringified = data.toString().trim().replace(/^\[\d\d\:\d\d:\d\d\]\s*/, '');
-  if (stringified) {
-    return log(`[${isErr ? colors.red('Error') + ' from ' : ''}${colors.gray(name)}]: ${stringified}`);
-  }
+  const stampColor = isErr ? colors.red : colors.gray;
+  const stringified = data.toString()
+                          .trim()
+                          .replace(/^\[\d\d\:\d\d:\d\d\]\s*/, '')
+                          .replace(/\n\[(\d\d\:\d\d:\d\d)\]\s*/g, `\n[${stampColor('$1')}] [${stampColor(name)}]: `);
+
+  return stringified && log(`[${stampColor(name)}]: ${stringified}`);
 }
 
 export function attachSchedules() {

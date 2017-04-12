@@ -43,3 +43,8 @@ gulp.task('js:watch', ['js:compile'], () => {
     log(colors.yellow('Javascript change'), "'" + colors.cyan(event.path) + "'");
   });
 });
+
+/**
+ * Main js task
+ */
+gulp.task('js:main', ['js:clean', 'js:compile', 'js:watch']);
