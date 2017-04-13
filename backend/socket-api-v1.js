@@ -7,8 +7,8 @@ export default function attachSocketAPI(socketServer, queries) {
   // Users will connect to the AUTHENTICATION channel and pass us a
   // username and password.
   socketServer.connect('AUTHENTICATION', (connection, identity) => {
-    log(colors.yellow('User requesting authentication...'));
-    console.log(identity.email, identity.password);
+    log('User requesting authentication...', identity.email);
+
     // We'll attempt to authenticate the identity.
     queries.authUser(identity.email, identity.password)
 
@@ -23,7 +23,7 @@ export default function attachSocketAPI(socketServer, queries) {
              // When the new session is made, send back AUTHENTICATED and
              // tell the user to reconnect to the AUTHENTICATED channel.
              creator.then(token => {
-               log(colors.green('User was authenticated.'));
+               log('User was authenticated:', identity.email);
                connection.send('AUTHENTICATED', {
                  sessionId: token,
                  user: result,
@@ -34,13 +34,18 @@ export default function attachSocketAPI(socketServer, queries) {
              // If we couldn't create a session. That's an error.
              creator.catch(err => {
                log(colors.red(err));
-               connection.send('SERVER_ERROR', err);
+               connection.send('SERVER_ERROR', {
+                 error: err,
+                 responseTo: 'AUTHENTICATION:connect'
+               });
              });
 
            // If we don't have a real result, the user is still UNAUTHORIZED.
            } else {
              log(colors.red('Failed to authorize user.'));
-             connection.send('UNAUTHORIZED');
+             connection.send('UNAUTHORIZED', {
+               responseTo: 'AUTHENTICATION:connect'
+             });
            }
          })
 
@@ -48,14 +53,16 @@ export default function attachSocketAPI(socketServer, queries) {
          // we'll send back UNAUTHORIZED.
          .catch(err => {
            log(colors.blue(err));
-           connection.send('UNAUTHORIZED');
+           connection.send('UNAUTHORIZED', {
+             responseTo: 'AUTHENTICATION:connect'
+           });
          });
   });
 
   // Authenticated users will connect to the AUTHENTICATED channel
   // and pass us a package with { sessionId: <token> }
   socketServer.connect('AUTHENTICATED', (connection, identity) => {
-    log(colors.yellow('User requesting authenticated API...'));
+    log('User requesting authenticated API...');
 
     // We'll add a filter to all incoming actions on this channel.
     // For each one, we'll expect the sessionId to be included.
@@ -69,7 +76,9 @@ export default function attachSocketAPI(socketServer, queries) {
         queries.deleteSession
       );
       validator.then(() => next());
-      validator.catch(() => connection.send('UNAUTHORIZED'));
+      validator.catch(() => connection.send('UNAUTHORIZED', {
+        responseTo: `AUTHENTICATED:${action}`
+      }));
     });
 
     /*******************************************
@@ -80,7 +89,9 @@ export default function attachSocketAPI(socketServer, queries) {
     // connection.receive('GET_USER', payload => {
     //   queries.readUser(payload.userId)
     //          .then(result => connection.send('USER_RECORD', result))
-    //          .catch(result => connection.send('NOT_FOUND'));
+    //          .catch(result => connection.send('NOT_FOUND', {
+    //            responseTo: 'AUTHENTICATED:GET_USER'
+    //          }));
     // });
 
   });
