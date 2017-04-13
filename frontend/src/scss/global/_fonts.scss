@@ -1,0 +1,47 @@
+@font-face {
+    font-family: 'freeland';
+    src: url('../fonts/freeland-regular-webfont.woff2') format('woff2'),
+         url('../fonts/freeland-regular-webfont.woff') format('woff');
+    font-weight: $book-weight;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'open-sans';
+    src: url('../fonts/opensans-light-webfont.woff2') format('woff2'),
+         url('../fonts/opensans-light-webfont.woff') format('woff');
+    font-weight: $light-weight;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'open-sans';
+    src: url('../fonts/opensans-regular-webfont.woff2') format('woff2'),
+         url('../fonts/opensans-regular-webfont.woff') format('woff');
+    font-weight: $book-weight;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'open-sans';
+    src: url('../fonts/opensans-italic-webfont.woff2') format('woff2'),
+         url('../fonts/opensans-italic-webfont.woff') format('woff');
+    font-weight: $book-weight;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'open-sans';
+    src: url('../fonts/opensans-bold-webfont.woff2') format('woff2'),
+         url('../fonts/opensans-bold-webfont.woff') format('woff');
+    font-weight: $bold-weight;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'open-sans';
+    src: url('../fonts/opensans-bolditalic-webfont.woff2') format('woff2'),
+         url('../fonts/opensans-bolditalic-webfont.woff') format('woff');
+    font-weight: $bold-weight;
+    font-style: italic;
+}
