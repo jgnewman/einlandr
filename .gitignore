@@ -30,9 +30,8 @@ build/Release
 node_modules
 jspm_packages
 
-# Optional npm/yarn cache directory
+# Optional npm cache directory
 .npm
-*.lock
 
 # Optional REPL history
 .node_repl_history
