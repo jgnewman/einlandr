@@ -9,7 +9,9 @@ var gutil = require('gulp-util');
 function up() {
 
   const isProd = process.env.NODE_ENV === 'production';
-  const cmdString = isProd ? '. env-prod && gulp up' : '. env-dev && gulp up';
+  const isImplicitEnv = process.argv[2] === '--implicit-env';
+  const prodCommand = isImplicitEnv ? 'gulp up' : '. env-prod && gulp up';
+  const cmdString = isProd ? prodCommand : '. env-dev && gulp up';
 
   gutil.log(gutil.colors.green(`Building ${process.env.NODE_ENV} app...`));
 

@@ -11,13 +11,16 @@
     "yarn": "^0.21.3"
   },
   "scripts": {
+    "start": "node index --implicit-env",
+    "migrate": "gulp db:migrate",
     "dev": ". env-dev && node index",
     "prod": ". env-prod && node index",
     "dev:migrate": ". env-dev && gulp db:migrate",
     "prod:migrate": ". env-prod && gulp db:migrate",
     "layer": "node utilities/layermaker/makelayer",
     "component": "node utilities/layermaker/makecomponent",
-    "test": ". env-dev && gulp test:main"
+    "dev:test": ". env-dev && gulp test:main",
+    "prod:test": ". env-prod && gulp test:main"
   },
   "author": "John Newman <rescuecreative@gmail.com>",
   "license": "MIT",

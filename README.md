@@ -89,17 +89,18 @@ The files should be called `env-dev` and `env-prod` respectively. No file extens
 
 ```bash
 export NODE_ENV=development
-export SERVER_PORT=8080
-export DB_DEV_NAME=einlandr
-export DB_SECRET="I've got a secret, I'm not gonna tell you"
+export PORT=8080
+export DATABASE_DEV_NAME=einlandr
+export DATABASE_SECRET="I've got a secret, I'm not gonna tell you"
 ```
 
 **env-prod**
 
 ```bash
 export NODE_ENV=production
-export SERVER_PORT=5000
-export DB_SECRET="Pirates always fight with cutlasses"
+# Some production environments automatically choose a port
+# export PORT=5000
+export DATABASE_SECRET="Pirates always fight with cutlasses"
 ```
 
 Everything you do with Einlandr is run through Yarn commands. These commands will source these files as appropriate, making them available throughout your server environment. That said, the expected workflow is that the config file should adjust itself based on these variables, then the rest of the server uses the config file. As you add new layers to your application that require environment variables, you will want to store those in these files and then make corresponding config values.
@@ -118,11 +119,11 @@ Einlandr can't actually create a database for you so you'll need to do this your
 
 ### Configuration
 
-Once you've created a database and named it, you'll need to plug that name into your env-dev file for the `DB_DEV_NAME` key. Also make sure you choose a `DB_SECRET` to go along with certain database-related actions.
+Once you've created a database and named it, you'll need to plug that name into your env-dev file for the `DATABASE_DEV_NAME` key. Also make sure you choose a `DATABASE_SECRET` to go along with certain database-related actions.
 
 Open up config.js, find the `backend` object, and make sure you set `dbEnabled` to true. Notice how other database values are pulled in from the environment. You'll want to follow this pattern when adding new configuration options.
 
-The `DB_URL` key is only necessary for production databases such as on Heroku. When you're ready to use it, it should take a form like:
+The `DATABASE_URL` key is only necessary for production databases such as on Heroku. When you're ready to use it, it should take a form like:
 
 ```
 postgres://axjxocwjzztraf:6f8b8351f2f87b26e50fa06210d7cbf1474567891dbdde5abb64440c7aa9c608@ec2-48-21-220-167.compute-1.amazonaws.com:5432/d2v3v3huf99oin
@@ -620,10 +621,13 @@ If you launch the app in dev mode, Einlandr will inject some auto-refresh code i
 
 Everything you do when working with Einlandr will be executed via Yarn commands. Here is a list of what's available:
 
+- `$ yarn start` - Launch the app using environment variables not specified through `env-dev` or `env-prod` files. For example, on heroku.
 - `$ yarn dev` - Launch the app using development variables
 - `$ yarn prod` - Launch the app using production variables
+- `$ yarn migrate` - Clean and seed the database using environment variables not specified through `env-dev` or `env-prod` files
 - `$ yarn dev:migrate` - Clean and seed the development database
 - `$ yarn prod:migrate` - Clean and seed the production database
 - `$ yarn layer <name>` - Generate a new layer to the React app (see [Adding a new React Layer](#adding-a-new-react-layer))
-- `$ yarn component <name>` - Generate a single React component.
-- `$ yarn test` - Launches Einlandr's unit tests using the dev environment.
+- `$ yarn component <name>` - Generate a single React component
+- `$ yarn dev:test` - Launches Einlandr's unit tests using the development environment
+- `$ yarn prod:test` - Launches Einlandr's unit tests using the production environment

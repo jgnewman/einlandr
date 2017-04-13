@@ -28,7 +28,7 @@ const config = {
 
   backend: {
 
-    serverPort: process.env.SERVER_PORT,
+    serverPort: process.env.PORT || 5000,
     serverSource: [
       './*', // Glob top level files but not protected directories
       '!./{frontend,.git,node_modules}',
@@ -45,9 +45,9 @@ const config = {
 
     // Database specific values
     dbEnabled: true,
-    dbURL: process.env.DB_URL || '',
-    dbSecret: process.env.DB_SECRET || '',
-    dbDevName: process.env.DB_DEV_NAME || '',
+    dbURL: process.env.DATABASE_URL || '',
+    dbSecret: process.env.DATABASE_SECRET || '',
+    dbDevName: process.env.DATABASE_DEV_NAME || '',
 
     // Cross-origin resource sharing
     corsEnabled: false,
