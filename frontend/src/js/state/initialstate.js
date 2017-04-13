@@ -1,4 +1,4 @@
-import { retrieveState } from '../lib/localPersist';
+import { retrieveState } from '../lib/localpersist';
 
 const initialState = {
   /* INJECT POINT 1 */
