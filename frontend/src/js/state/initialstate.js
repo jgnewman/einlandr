@@ -1,4 +1,4 @@
-import { retrieveState } from '../lib/localpersist';
+import { hydrateState } from '../lib/localpersist';
 
 const initialState = {
   /* INJECT POINT 1 */
@@ -6,9 +6,4 @@ const initialState = {
 
 };
 
-function hydrateInitialState() {
-  const storage = retrieveState();
-  return storage || initialState;
-}
-
-export default hydrateInitialState();
+export default hydrateState(initialState);

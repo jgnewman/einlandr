@@ -87,3 +87,24 @@ export function retrieveState() {
 export function uniqueId() {
   return (+new Date) + '-' + Math.round(Math.random() * 50000)
 }
+
+/**
+ * Takes a template for an initial state and attempts to
+ * hydrate it with values found in localStorage.
+ *
+ * @param  {Object} initialState  A template for the application state.
+ *
+ * @return {Object}  The template populated with values.
+ */
+export function hydrateState(initialState) {
+  const storage = retrieveState();
+  if (!storage) {
+    return initialState;
+  } else {
+    const hydrated = {};
+    Object.keys(initialState).forEach(subState => {
+      hydrated[subState] = Object.assign({}, initialState[subState], storage[subState] || {});
+    });
+    return hydrated;
+  }
+}

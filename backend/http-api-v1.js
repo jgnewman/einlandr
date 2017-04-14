@@ -1,7 +1,8 @@
 import {
   applyAuth,
   generateSession,
-  destroySession
+  destroySession,
+  validateSession
 } from './server-auth';
 
 export default function attachAPI(app, queries) {
@@ -45,6 +46,15 @@ export default function attachAPI(app, queries) {
     const destroyer = destroySession(token, queries.deleteSession);
     destroyer.then(() => res.sendStatus(200));
     destroyer.catch(() => res.sendStatus(500));
+  });
+
+  // POST to authentication/check
+  // Check an auth token
+  app.post('/api/v1/authentication/check', (req, res) => {
+    const token = req.body.token;
+    const validator = validateSession(token, queries.readSession, queries.updateSession, queries.deleteSession);
+    validator.catch(() => res.sendStatus(401));
+    validator.then(() => res.sendStatus(200));
   });
 
   /*******************************************
