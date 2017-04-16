@@ -66,7 +66,7 @@ fs.readFile(containerPath, function (err) {
     })
 
   } else {
-    log('Detected a pre-existing ' + names.container + '. Aborting...');
+    log(colors.red('Detected a pre-existing ' + names.container + '. Aborting...'));
     log('Process aborted.', colors.magenta(mainTimer.end()));
   }
 });
