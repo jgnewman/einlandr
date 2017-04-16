@@ -45,8 +45,8 @@ fs.readFile(names.filePath, function (err) {
 
   } else {
 
-    log(colors.red('Detected a pre-existing' + names.component + ' file. Aborting...'));
-    og('Process aborted.', colors.magenta(mainTimer.end()));
+    log(colors.red('Detected a pre-existing ' + names.component + ' file. Aborting...'));
+    log('Process aborted.', colors.magenta(mainTimer.end()));
 
   }
 });
