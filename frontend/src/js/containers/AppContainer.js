@@ -7,7 +7,7 @@ import bindHandlers from '../lib/bindhandlers';
 import App from '../components/App';
 
 import * as appActions from '../actions/appActions';
-import * as data from '../data/appData';
+import * as appData from '../data/appData';
 import * as handlers from '../handlers/appHandlers';
 
 class AppContainer extends Component {
@@ -19,7 +19,7 @@ class AppContainer extends Component {
   }
 
   render() {
-    const { actions } = this.props;
+    const { actions, data } = this.props;
 
     return (
       <App
@@ -56,7 +56,10 @@ function action(dispatch) {
   // Bind any further actions here...
   // actionCreators.foo = bindActionCreators(foo, dispatch);
 
-  return { actions: actionCreators };
+  return {
+    actions: actionCreators,
+    data: appData
+  };
 }
 
 export default connect(select, action)(AppContainer);

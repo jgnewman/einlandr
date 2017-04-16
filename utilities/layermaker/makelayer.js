@@ -1,3 +1,5 @@
+var fs = require('fs');
+var path = require('path');
 var gutil = require('gulp-util');
 var Timer = require('./timer');
 var makeStyles = require('./makestyles');
@@ -48,12 +50,23 @@ function finish() {
   log('Finished new React layer', "'" + colors.cyan(layerName) + "' after", colors.magenta(mainTimer.end()));
 }
 
-makeStyles(names, function () {
-  stylesFinished = true;
-  jsFinished && finish();
-});
+var containerPath = path.resolve(__dirname, '../', '../', 'frontend', 'src', 'js', 'containers', names.containerFile);
 
-makeJs(names, function () {
-  jsFinished = true;
-  stylesFinished && finish();
-})
+fs.readFile(containerPath, function (err) {
+  if (err) {
+
+    makeStyles(names, function () {
+      stylesFinished = true;
+      jsFinished && finish();
+    });
+
+    makeJs(names, function () {
+      jsFinished = true;
+      stylesFinished && finish();
+    })
+
+  } else {
+    log('Detected a pre-existing ' + names.container + '. Aborting...');
+    log('Process aborted.', colors.magenta(mainTimer.end()));
+  }
+});
