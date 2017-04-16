@@ -27,16 +27,26 @@ var names = {
   filePath: path.resolve(__dirname, '../', '../', 'frontend', 'src', 'js', 'components', componentNameCapital + '.js')
 };
 
-var template = makeComponentTemplate(names);
-
-
 function finish() {
   log('Finished new React component', "'" + colors.cyan(componentNameCapital) + "' after", colors.magenta(mainTimer.end()));
 }
 
-fs.writeFile(names.filePath, template, function (err) {
+fs.readFile(names.filePath, function (err) {
   if (err) {
-    log(colors.red('Failed to make new React component:'), err);
+
+    var template = makeComponentTemplate(names);
+
+    fs.writeFile(names.filePath, template, function (err) {
+      if (err) {
+        log(colors.red('Failed to make new React component:'), err);
+      }
+      finish();
+    });
+
+  } else {
+
+    log(colors.red('Detected a pre-existing' + names.component + ' file. Aborting...'));
+    og('Process aborted.', colors.magenta(mainTimer.end()));
+
   }
-  finish();
 });
