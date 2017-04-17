@@ -9,17 +9,23 @@ export default function defineQueries(db, models) {
   Object.keys(models).forEach(key => {
 
     // Make a create function for each model
-    queries[`create${key}`] = values => {
+    queries[`create${key}`] = (values, res) => {
       const promise = models[key].create(values);
-      promise.catch(err => log(colors.red(err)));
+      promise.catch(err => {
+        log(colors.red(err));
+        res && res.sendStatus(500);
+      });
       promise.then(() => log(colors.green(`Successfully created ${key}`)));
       return simplify(promise);
     };
 
     // Make a read-by-id function for each model
-    queries[`read${key}`] = primaryKey => {
+    queries[`read${key}`] = (primaryKey, res) => {
       const promise = models[key].findById(primaryKey);
-      promise.catch(err => log(colors.red(err)));
+      promise.catch(err => {
+        log(colors.red(err));
+        res && res.sendStatus(500);
+      });
       promise.then(result => {
         result ? log(colors.green(`Successfully retrieved ${key}`))
                : log(colors.blue(`Could not find a matching record.`));
@@ -30,9 +36,12 @@ export default function defineQueries(db, models) {
     // Make a read-all function for each model
     // BE CAREFUL USING THIS IF YOU HAVE LOTS OF RECORDS!
     // `where` is an optional object of sequelize attributes
-    queries[`readAll${key}`] = where => {
+    queries[`readAll${key}`] = (where, res) => {
       const promise = models[key].findAll(where ? { where: where } : undefined);
-      promise.catch(err => log(colors.red(err)));
+      promise.catch(err => {
+        log(colors.red(err));
+        res && res.sendStatus(500);
+      });
       promise.then(result => {
         result[0] ? log(colors.green(`Successfully retrieved ${key} records`))
                   : log(colors.blue('No records were retrieved.'));
@@ -41,12 +50,15 @@ export default function defineQueries(db, models) {
     };
 
     // Make an update-by-id function for each model
-    queries[`update${key}`] = (primaryKey, values) => {
+    queries[`update${key}`] = (primaryKey, values, res) => {
       const promise = models[key].update(values, {
         where: { id: primaryKey },
         returning: true
       });
-      promise.catch(err => log(colors.red(err)));
+      promise.catch(err => {
+        log(colors.red(err));
+        res && res.sendStatus(500);
+      });
       promise.then(result => {
         result[0] ? log(colors.green(`Successfully updated ${key}`))
                   : log(colors.blue('No records were updated.'));
@@ -55,9 +67,12 @@ export default function defineQueries(db, models) {
     };
 
     // Make a read-by-id function for each model
-    queries[`delete${key}`] = primaryKey => {
+    queries[`delete${key}`] = (primaryKey, res) => {
       const promise = models[key].destroy({ where: { id: primaryKey } });
-      promise.catch(err => log(colors.red(err)));
+      promise.catch(err => {
+        log(colors.red(err));
+        res && res.sendStatus(500);
+      });
       promise.then(() => log(colors.green(`Successfully deleted ${key}`)));
       return promise;
     };
@@ -65,9 +80,12 @@ export default function defineQueries(db, models) {
     // Make a delete-all function for each model
     // BE CAREFUL USING THIS IF YOU HAVE LOTS OF RECORDS!
     // `where` is an optional object of sequelize attributes
-    queries[`deleteAll${key}`] = where => {
+    queries[`deleteAll${key}`] = (where, res) => {
       const promise = models[key].destroy(where ? { where: where } : undefined);
-      promise.catch(err => log(colors.red(err)));
+      promise.catch(err => {
+        log(colors.red(err));
+        res && res.sendStatus(500);
+      });
       promise.then(result => {
         result ? log(colors.green(`Successfully deleted ${result} ${key} records`))
                : log(colors.blue('No records were deleted.'));
