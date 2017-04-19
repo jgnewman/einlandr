@@ -20,7 +20,9 @@ gulp.task('up', ['scss:main', 'js:main', 'templates:main', 'server:main'], () =>
   log(colors.gray(`-- App available at  | ${colors.cyan(config.tmp.ngrokURL || '...')}`));
 
   config.tmp.schedules &&
-  log(colors.gray(`-- Running schedules | ${colors.cyan(config.tmp.schedules.join(', '))}`));
+  log(colors.gray(`-- Running schedules | ${colors.cyan(config.tmp.schedules.map((name, index) => {
+    return index === 0 ? name : '\n                                  ' + name;
+  }).join(', '))}`));
 
   if (config.tmp.errors && config.tmp.errors.length) {
     log(colors.red('Errors were received during startup:\n'));
