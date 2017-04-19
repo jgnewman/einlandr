@@ -22,5 +22,14 @@ gulp.task('up', ['scss:main', 'js:main', 'templates:main', 'server:main'], () =>
   config.tmp.schedules &&
   log(colors.gray(`-- Running schedules | ${colors.cyan(config.tmp.schedules.join(', '))}`));
 
+  if (config.tmp.errors && config.tmp.errors.length) {
+    log(colors.red('Errors were received during startup:\n'));
+    config.tmp.errors.forEach((err, index) => {
+      console.log(colors.red(`Error ${index + 1}:`))
+      console.log(err.replace(/^Error:\s*/, ''));
+    });
+    config.tmp.errors = [];
+  }
+
   finishRefreshing();
 });

@@ -24,7 +24,14 @@ gulp.task('js:clean', () => {
 gulp.task('js:compile', ['js:clean'], () => {
   const stream = browserify(config.frontend.jsEntry)
                    .transform('babelify', {presets: ['es2015', 'react']})
-                   .bundle()
+                   .bundle().on('error', function (err) {
+                     config.tmp.errors = config.tmp.errors || [];
+                     config.tmp.errors.push(err.message);
+                     console.log('');
+                     console.log(colors.red('Browserify error:'), err.message);
+                     console.log('');
+                     return this.emit('end');
+                   })
                    .pipe(source('app.js'))
                    .pipe(buffer())
                    .pipe(gulpif(config.isProduction, uglify()))

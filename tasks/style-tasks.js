@@ -20,7 +20,11 @@ gulp.task('scss:clean', () => {
  */
 gulp.task('scss:compile', ['scss:clean'], () => {
   const stream = gulp.src(config.frontend.scssEntry)
-                   .pipe(sass())
+                   .pipe(sass().on('error', function (err) {
+                     config.tmp.errors = config.tmp.errors || [];
+                     config.tmp.errors.push(err.formatted);
+                     return sass.logError.call(this, err);
+                   }))
                    .pipe(gulpif(config.isProduction, cleanCSS(), sourcemaps.write()))
                    .pipe(gulp.dest(config.frontend.scssDest));
 
