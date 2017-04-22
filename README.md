@@ -311,7 +311,11 @@ Einlandr comes with a built-in method for authentication using json web tokens. 
 
 ### Database schema
 
-In backend/db-models.js, a User model and a Session model have already been created. Users are expected to have an email address and password to match against for authentication. When a user is authenticated, a session will be created in the sessions table.
+In backend/db-models.js, a User model and a Session model have already been created. Users are expected to have an email address and password to match against for authentication.
+
+> Note that raw passwords are not saved in the database. Passwords are encrypted via PBKDF2 with HMAC-SHA-512 as a core hashing algorithm and using a randomly generated 16 byte salt at 100,000 iterations.
+
+When a user is authenticated, a session will be created in the sessions table.
 
 By running the migration script (`$ yarn dev:migrate`), you will have 2 users created in the database that you can experiment with.
 
@@ -331,7 +335,8 @@ axios.post('/api/v1/authentication', {
 })
 
 // If it worked, we'll get back a session token and a
-// user record.
+// user record. Note that password fields are removed
+// from this record.
 .then(result => { console.log(result.token, result.user) })
 
 // If not, we'll log the error.

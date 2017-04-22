@@ -32,4 +32,6 @@
 - [x] schedules redundantly run on server reload. fix this
 - [x] Finish documenting + testing all db API fns
 - [x] Add in session suppression
+- [x] More stable promise Handling
+- [x] Hash and salt passwords automatically
 - [ ] More unit tests

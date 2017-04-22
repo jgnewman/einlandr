@@ -5,6 +5,8 @@ import {
   validateSession
 } from './server-auth';
 
+import promiser from 'stateful-promise';
+
 export default function attachAPI(app, queries) {
 
   // Make sure authentication requirements are properly applied
@@ -26,35 +28,73 @@ export default function attachAPI(app, queries) {
   // Log a user in
   // Return a session id
   app.post('/api/v1/authentication/', (req, res) => {
-    queries.authUser(req.body.email, req.body.password).then(result => {
-      if (result) {
-        const creator = generateSession(result, queries.createSession, queries.suppressSession);
-        delete result.password;
-        creator.then(session => res.send({ token: session.id, user: result }));
-        creator.catch(() => res.sendStatus(500));
-      } else {
-        res.sendStatus(401);
-      }
+    promiser({
+      email: req.body.email,
+      password: req.body.password
     })
-    .catch(result => res.sendStatus(401));
+
+    // Attempt to authenticate the user
+    .then(state => {
+      return state.set('user', queries.authUser(state.email, state.password), 401)
+    })
+
+    // Remove password-related fields from the record and
+    // create a new session
+    .then(state => {
+      delete state.user.password;
+      delete state.user.pwdSalt;
+      delete state.user.pwdIterations;
+      return state.set('session', generateSession(
+        state.user,
+        queries.createSession,
+        queries.suppressSession
+      ), 500)
+    })
+
+    // Send positive info to the user.
+    .then(state => {
+      res.send({ token: state.session.id, user: state.user })
+    })
+
+    // Send a failing status if something didn't work.
+    .catch((_, err) => {
+      res.sendStatus(err);
+    })
   });
 
   // POST to authentication/logout
   // Log a user out
   app.post('/api/v1/authentication/logout', (req, res) => {
-    const token = req.body.token;
-    const destroyer = destroySession(token, queries.deleteSession);
-    destroyer.then(() => res.sendStatus(200));
-    destroyer.catch(() => res.sendStatus(500));
+    promiser()
+
+    // Destory a session
+    .then(state => {
+      return state.set('destroyed', destorySession(req.body.token, queries.deleteSession))
+    })
+
+    // Then provide feedback on whether it worked or not
+    .then(() => res.sendStatus(200))
+    .catch(() => res.sendStatus(500))
   });
 
   // POST to authentication/check
   // Check an auth token
   app.post('/api/v1/authentication/check', (req, res) => {
-    const token = req.body.token;
-    const validator = validateSession(token, queries.readSession, queries.updateSession, queries.deleteSession);
-    validator.catch(() => res.sendStatus(401));
-    validator.then(() => res.sendStatus(200));
+    promiser()
+
+    // Validate the token
+    .then(state => {
+      return state.set('validated', validateSession(
+        req.body.token,
+        queries.readSession,
+        queries.updateSession,
+        queries.deleteSession
+      ))
+    })
+
+    // Provide info about whether or not it worked
+    .then(() => res.sendStatus(200))
+    .catch(() => res.sendStatus(401))
   });
 
   /*******************************************
@@ -62,9 +102,10 @@ export default function attachAPI(app, queries) {
    *******************************************/
 
   app.get('/api/v1/users/:id', (req, res) => {
-    queries.readUser(req.params.id)
-           .then(result => { res.send(result) })
-           .catch(() => { res.sendStatus(404) });
+    promiser()
+      .then(state => state.set('user', queries.readUser(req.params.id)))
+      .then(state => res.send(state.user))
+      .catch(()   => res.sendStatus(404))
   });
 
   /*******************************************

@@ -10,11 +10,13 @@ export default function defineModels(db) {
   // A user table with email and password is necessary for authentication
   // to work. Feel free to modify any other fields.
   models.User = db.define('user', {
-    id:           { type: S.INTEGER, primaryKey: true, autoIncrement: true },
-    firstName:    { type: S.STRING, defaultValue: 'User' },
-    lastName:     { type: S.STRING, defaultValue: 'McUserface' },
-    email:        { type: S.STRING, validate: { notEmpty: true }, unique: true },
-    password:     { type: S.STRING, validate: { notEmpty: true } }
+    id:            { type: S.INTEGER, primaryKey: true, autoIncrement: true },
+    firstName:     { type: S.STRING,           defaultValue: 'User' },
+    lastName:      { type: S.STRING,           defaultValue: 'McUserface' },
+    email:         { type: S.STRING,           validate: { notEmpty: true }, unique: true },
+    password:      { type: S.STRING(1024),     validate: { notEmpty: true } },
+    pwdSalt:       { type: S.ARRAY(S.INTEGER), validate: { notEmpty: true } },
+    pwdIterations: { type: S.INTEGER,          validate: { notEmpty: true } }
   });
 
   // Example.

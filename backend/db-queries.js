@@ -1,5 +1,7 @@
 import { log, colors } from 'gulp-util';
+import promiser from 'stateful-promise';
 import { simplify } from './db-utils';
+import { verifyPassword } from './password-tools';
 
 
 export default function defineQueries(db, models) {
@@ -102,15 +104,32 @@ export default function defineQueries(db, models) {
   // Example
   // Note, this is necessary for authentication to work.
   queries.authUser = (email, password) => {
-    const promise = models.User.findOne({
-      where: { email: email, password: password }
+    return new Promise((resolve, reject) => {
+      promiser()
+
+      .then(state => {
+        return state.set('user', simplify(
+          models.User.findOne({ where: { email: email } }),
+          { preservePwd: true }
+        ), 404)
+      })
+
+      .then(state => {
+        return state.set('validated', verifyPassword(
+          password,
+          state.user.password,
+          Buffer(state.user.pwdSalt),
+          state.user.pwdIterations
+        ), 500)
+      })
+
+      .then(state => {
+        return state.rejectIf(!state.validated, 401)
+      })
+
+      .then(state => resolve(state.user))
+      .catch((_, err) => reject(err))
     });
-    promise.catch(err => log(colors.red(err)));
-    promise.then(result => {
-      result ? log(colors.green(`Found user with matching email & password.`))
-             : log(colors.blue(`Could not find user with matching email & password.`));
-    });
-    return simplify(promise, { preservePwd: true });
   };
 
   // Example
