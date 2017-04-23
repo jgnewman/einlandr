@@ -111,7 +111,11 @@ export default function defineQueries(db, models) {
         return state.set('user', simplify(
           models.User.findOne({ where: { email: email } }),
           { preservePwd: true }
-        ), 404)
+        ), 401)
+      })
+
+      .then(state => {
+        return state.rejectIf(!state.user, 401)
       })
 
       .then(state => {
