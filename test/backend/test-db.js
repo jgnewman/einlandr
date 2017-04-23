@@ -256,15 +256,15 @@ describe('Database', function () {
 
         // Expire all 3 sessions
         .then(state => {
-          return state.forEach('sessionList', session => {
+          return state.map('sessionList', session => {
             return queries.updateSession(session.id, { expiresAt: now });
-          }, { map: true })
+          })
         })
 
         // Add a 4th user
         .then(state => {
           config.backend.sessionSuppression = 2;
-          return promiser.addProp(state.userList, 3, queries.createUser(Object.assign({}, {
+          return state.setTo(state.userList, 3, queries.createUser(Object.assign({}, {
             firstName: 'Test',
             lastName: 'User',
             email: Math.random() + '@testuser.com'
@@ -274,7 +274,7 @@ describe('Database', function () {
         // Add a 4th session. The idea is that this should remove
         // 2 of our pre-created sessions from the db automatically.
         .then(state => {
-          return promiser.addProp(state.sessionList, 3, generateSession(
+          return state.setTo(state.sessionList, 3, generateSession(
             state.userList[3],
             queries.createSession,
             queries.suppressSession

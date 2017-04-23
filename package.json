@@ -65,7 +65,7 @@
     "secure-random": "^1.1.1",
     "sequelize": "^3.30.4",
     "socket.io": "^1.7.3",
-    "stateful-promise": "^0.0.8",
+    "stateful-promise": "^1.0.1",
     "uuid": "^3.0.1",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0"

@@ -4448,9 +4448,9 @@ sshpk@^1.7.0:
     jsbn "~0.1.0"
     tweetnacl "~0.14.0"
 
-stateful-promise@^0.0.8:
-  version "0.0.8"
-  resolved "https://registry.yarnpkg.com/stateful-promise/-/stateful-promise-0.0.8.tgz#d48669a8296acfd42b90269c9f60182999bf1eea"
+stateful-promise@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/stateful-promise/-/stateful-promise-1.0.1.tgz#758bdd61be062dab7f32ddca34ececfe3b774706"
   dependencies:
     gulp-mocha "^4.3.0"
 
