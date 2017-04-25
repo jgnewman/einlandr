@@ -4710,9 +4710,9 @@ sshpk@^1.7.0:
     jsbn "~0.1.0"
     tweetnacl "~0.14.0"
 
-stateful-promise@^1.2.2:
-  version "1.2.2"
-  resolved "https://registry.yarnpkg.com/stateful-promise/-/stateful-promise-1.2.2.tgz#e4c2b6f1fd37490e6b14f21b8786dd37965fbedb"
+stateful-promise@^1.2.3:
+  version "1.2.3"
+  resolved "https://registry.yarnpkg.com/stateful-promise/-/stateful-promise-1.2.3.tgz#8438a69308e19f0dc7ab9eb9213103a300d8530e"
 
 "statuses@>= 1.3.1 < 2", statuses@~1.3.1:
   version "1.3.1"
