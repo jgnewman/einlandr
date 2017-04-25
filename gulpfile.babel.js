@@ -1,3 +1,4 @@
+import 'babel-polyfill';
 import gulp from 'gulp';
 import { log, colors } from 'gulp-util';
 import { finishRefreshing } from './utilities/reloader/server-reloader';
