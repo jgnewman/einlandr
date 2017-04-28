@@ -2,13 +2,14 @@
 /**
  * Turn an array of strings into an object of mirrored keys
  *
- * @param  {Array}  array  An array of strings
+ * @param  {String} prefix  A string to prefix constants with.
+ * @param  {Array}  array   An array of strings
  *
- * @return {Object}        Where keys and values are the same.
+ * @return {Object}         Where keys and values are the same.
  */
-function objectize(array) {
+function objectize(prefix, array) {
   const obj = {};
-  array.forEach(item => obj[item] = item);
+  array.forEach(item => obj[item] = prefix + '_' + item);
   return obj;
 }
 
@@ -17,13 +18,13 @@ function objectize(array) {
 /**
  * Constants for App-related items
  */
-export const APP = objectize([
+export const APP = objectize('APP', [
   'FOO'
 ]);
 
 /**
  * Constants for Global-related items
  */
-export const GLOBALS = objectize([
+export const GLOBALS = objectize('GLOBALS', [
   'FOO'
 ]);
