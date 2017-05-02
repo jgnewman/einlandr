@@ -30,7 +30,7 @@ function makeConstantTemplate(capitalized, allCaps) {
   return '/**\n'
        + ' * Constants for ' + capitalized + '-related items\n'
        + ' */\n'
-       + 'export const ' + allCaps + " = objectize('" + allCaps + "', '[\n"
+       + 'export const ' + allCaps + " = objectize('" + allCaps + "', [\n"
        + "  'FOO'\n"
        + ']);';
 }
