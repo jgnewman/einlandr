@@ -27,85 +27,100 @@ export default function attachAPI(app, queries) {
   // Takes email, password
   // Log a user in
   // Return a session id
-  app.post('/api/v1/authentication/', (req, res) => {
-    promiser({
-      email: req.body.email,
-      password: req.body.password
-    })
+  app.post('/api/v1/authentication/', async (req, res) => {
+    try {
 
-    // Attempt to authenticate the user
-    .then(state => {
-      return state.set('user', queries.authUser(state.email, state.password), 401)
-    })
+      const state = await promiser({
+        email: req.body.email,
+        password: req.body.password
+      });
 
-    // Remove password-related fields from the record and
-    // create a new session
-    .then(state => {
+      // Attempt to authenticate the user
+      await state.set('user', queries.authUser(state.email, state.password), 401);
+      await state.rejectIf(!state.user, 401);
+
+      // Remove password-related fields from the record and
+      // create a new session
       delete state.user.password;
       delete state.user.pwdSalt;
       delete state.user.pwdIterations;
-      return state.set('session', generateSession(
+
+      await state.set('session', generateSession(
         state.user,
         queries.createSession,
         queries.suppressSession
-      ), 500)
-    })
+      ), 500);
 
-    // Send positive info to the user.
-    .then(state => {
-      res.send({ token: state.session.id, user: state.user })
-    })
+      // Send positive info to the user.
+      await state.handle(res.send({ token: state.session.id, user: state.user }));
 
-    // Send a failing status if something didn't work.
-    .catch((_, err) => {
+    } catch ({err}) {
+
+      // Send a failing status if something didn't work.
       res.sendStatus(err);
-    })
+
+    }
+
   });
 
   // POST to authentication/logout
   // Log a user out
-  app.post('/api/v1/authentication/logout', (req, res) => {
-    promiser()
+  app.post('/api/v1/authentication/logout', async (req, res) => {
+    try {
 
-    // Destory a session
-    .then(state => {
-      return state.set('destroyed', destorySession(req.body.token, queries.deleteSession))
-    })
+      const state = await promiser();
 
-    // Then provide feedback on whether it worked or not
-    .then(() => res.sendStatus(200))
-    .catch(() => res.sendStatus(500))
+      // Destroy a session
+      await state.set('destroyed', destroySession(req.body.token, queries.deleteSession), 500);
+
+      // Then provide feedback on whether it worked or not
+      await state.handle(res.sendStatus(200));
+
+    } catch ({ err }) {
+
+      res.sendStatus(err);
+    }
   });
 
   // POST to authentication/check
   // Check an auth token
-  app.post('/api/v1/authentication/check', (req, res) => {
-    promiser()
+  app.post('/api/v1/authentication/check', async (req, res) => {
+    try {
 
-    // Validate the token
-    .then(state => {
-      return state.set('validated', validateSession(
+      const state = await promiser();
+
+      // Validate the token
+      await state.set('validated', validateSession(
         req.body.token,
         queries.readSession,
         queries.updateSession,
         queries.deleteSession
-      ))
-    })
+      ), 500)
+      await state.rejectIf(!state.validated, 401)
 
-    // Provide info about whether or not it worked
-    .then(() => res.sendStatus(200))
-    .catch(() => res.sendStatus(401))
+      // Send the result
+      await state.handle(res.sendStatus(200));
+
+    } catch ({ err }) {
+
+      res.setStatus(err);
+
+    }
   });
 
   /*******************************************
    * Users
    *******************************************/
 
-  app.get('/api/v1/users/:id', (req, res) => {
-    promiser()
-      .then(state => state.set('user', queries.readUser(req.params.id)))
-      .then(state => res.send(state.user))
-      .catch(()   => res.sendStatus(404))
+  app.get('/api/v1/users/:id', async (req, res) => {
+    try {
+      const state = await promiser();
+      await state.set('user', queries.readUser(req.params.id));
+      await state.rejectIf(!state.user, 404);
+      await state.handle(res.send(state.user));
+    } catch ({ err }) {
+      res.sendStatus(err);
+    }
   });
 
   /*******************************************

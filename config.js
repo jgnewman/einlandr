@@ -31,7 +31,7 @@ const config = {
     serverPort: process.env.PORT || 5000,
     serverSource: [
       './*', // Glob top level files but not protected directories
-      '!./{frontend,.git,node_modules}',
+      '!./{frontend,.git,test,node_modules}',
 
       './tasks/**/*',     // gulp tasks
       './backend/**/*',   // backend files
@@ -48,6 +48,7 @@ const config = {
     dbURL: process.env.DATABASE_URL || '',
     dbSecret: process.env.DATABASE_SECRET || '',
     dbDevName: process.env.DATABASE_DEV_NAME || '',
+    dbDevPwd: process.env.DATABASE_DEV_PASSWORD || '',
 
     // Cross-origin resource sharing
     corsEnabled: false,

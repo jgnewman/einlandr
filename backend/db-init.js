@@ -54,7 +54,7 @@ function dbConnect() {
        * Setup your dev db here
        ******************************/
 
-      tempDB = new Sequelize(config.backend.dbDevName, 'postgres', '', {
+      tempDB = new Sequelize(config.backend.dbDevName, 'postgres', config.backend.dbDevPwd, {
         host: 'localhost',
         dialect: 'postgres',
         pool: {

@@ -8,9 +8,9 @@ function create(model, values, logMsg) {
   return mod;
 }
 
-export default function migrate(callback) {
+export default function seed(callback) {
   dbReady((queries, models, db) => {
-    log(colors.cyan('Migrating database...'));
+    log(colors.cyan('Refreshing and seeding the database...'));
 
     // Drop existing tables and create schema
     db.sync({ force: true })
@@ -73,7 +73,7 @@ export default function migrate(callback) {
        * Create your data here
        ******************************/
 
-      // Necessary for the migrate task to exit properly
+      // Necessary for the seed task to exit properly
       .then(() => {
         callback && callback();
       });

@@ -23,7 +23,7 @@ gulp.task('js:clean', () => {
  */
 gulp.task('js:compile', ['js:clean'], () => {
   const stream = browserify(config.frontend.jsEntry)
-                   .transform('babelify', {presets: ['es2015', 'react']})
+                   .transform('babelify')
                    .bundle().on('error', function (err) {
                      config.tmp.errors = config.tmp.errors || [];
                      config.tmp.errors.push(err.message);

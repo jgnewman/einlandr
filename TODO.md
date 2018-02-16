@@ -34,4 +34,6 @@
 - [x] Add in session suppression
 - [x] More stable promise Handling
 - [x] Hash and salt passwords automatically
+- [ ] Reduquelize
+- [ ] remove stateful promise?
 - [ ] More unit tests

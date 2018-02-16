@@ -60,7 +60,7 @@ On the back end:
 - Optionally enable/disable CORS
 - Optionally enable/disable use of a database
 - A bootstrapped database schema with Users and Sessions
-- A bootstrapped database migration script + Yarn command
+- A bootstrapped database setup and seeding script + Yarn command
 - A bootstrapped http API
 - A bootstrapped Websocket API
 - Built-in authentication using JSON web tokens
@@ -91,6 +91,7 @@ The files should be called `env-dev` and `env-prod` respectively. No file extens
 export NODE_ENV=development
 export PORT=8080
 export DATABASE_DEV_NAME=einlandr
+export DATABASE_DEV_PASSWORD=password
 export DATABASE_SECRET="I've got a secret, I'm not gonna tell you"
 ```
 
@@ -129,13 +130,13 @@ The `DATABASE_URL` key is only necessary for production databases such as on Her
 postgres://axjxocwjzztraf:6f8b8351f2f87b26e50fa06210d7cbf1474567891dbdde5abb64440c7aa9c608@ec2-48-21-220-167.compute-1.amazonaws.com:5432/d2v3v3huf99oin
 ```
 
-### Migration (seeding)
+### Seeding
 
 In order to create a database scheme, Einlandr uses [Sequelize](http://docs.sequelizejs.com/en/v3/). If you open backend/db-models.js you will see that the first two ORM models have been created for you, namely Users and Sessions. These two models are necessary for Einlandr's built-in authentication to work properly so I'd recommend against deleting them, although you can feel free to modify the Users model to your heart's content as long as you leave email and password intact.
 
 Define all the additional models you'd like in the area labeled "Define your models here". This will allow Sequelize to set up all of the necessary tables and relations for you.
 
-Next, open up backend/db-migrate.js and look for the area labeled as "Create your data here". Just above this line you will see two examples of users that will be seeded into the database whenever you run your migration script. Feel free to copy/paste this pattern in order to easily add new seed data:
+Next, open up backend/db-seed.js and look for the area labeled as "Create your data here". Just above this line you will see two examples of users that will be seeded into the database whenever you run your seed script. Feel free to copy/paste this pattern in order to easily add new seed data:
 
 ```javascript
 // Create a new User with these values
@@ -147,9 +148,9 @@ Next, open up backend/db-migrate.js and look for the area labeled as "Create you
 }, 'Created user John Doe')) // Useful console output on creation success
 ```
 
-The migration command is `yarn dev:migrate` for development environments or `yarn prod:migrate` for production environments. Remember that the only difference between these two commands is which set of envionment variables it uses and how it connects to your database.
+The seed command is `yarn dev:seed` for development environments or `yarn prod:seed` for production environments. Remember that the only difference between these two commands is which set of envionment variables it uses and how it connects to your database.
 
-**The migration script will drop all tables** if they already exist and then create everything from scratch. So only use it when that's what you want.
+**The seed script will drop all tables** if they already exist and then create everything from scratch. So only use it when that's what you want.
 
 ### Defining an API
 
@@ -241,7 +242,7 @@ dbReady(queries => {
 });
 ```
 
-Note that the above script will only be able to log out data if you have already run the database migration script or you have put users into your database in some other way.
+Note that the above script will only be able to log out data if you have already run the database seed script or you have put users into your database in some other way.
 
 ## Using the http API
 
@@ -317,7 +318,7 @@ In backend/db-models.js, a User model and a Session model have already been crea
 
 When a user is authenticated, a session will be created in the sessions table.
 
-By running the migration script (`$ yarn dev:migrate`), you will have 2 users created in the database that you can experiment with.
+By running the seed script (`$ yarn dev:seed`), you will have 2 users created in the database that you can experiment with.
 
 ### Http api
 
@@ -629,9 +630,9 @@ Everything you do when working with Einlandr will be executed via Yarn commands.
 - `$ yarn start` - Launch the app using environment variables not specified through `env-dev` or `env-prod` files. For example, on heroku.
 - `$ yarn dev` - Launch the app using development variables
 - `$ yarn prod` - Launch the app using production variables
-- `$ yarn migrate` - Clean and seed the database using environment variables not specified through `env-dev` or `env-prod` files
-- `$ yarn dev:migrate` - Clean and seed the development database
-- `$ yarn prod:migrate` - Clean and seed the production database
+- `$ yarn seed` - Clean and seed the database using environment variables not specified through `env-dev` or `env-prod` files
+- `$ yarn dev:seed` - Clean and seed the development database
+- `$ yarn prod:seed` - Clean and seed the production database
 - `$ yarn layer <name>` - Generate a new layer to the React app (see [Adding a new React Layer](#adding-a-new-react-layer))
 - `$ yarn component <name>` - Generate a single React component
 - `$ yarn dev:test` - Launches Einlandr's unit tests using the development environment
