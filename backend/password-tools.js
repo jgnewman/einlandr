@@ -52,14 +52,15 @@ export function createHashAndSalt(password) {
  * @param  {String}       hashToMatch  The hashed password we need to match.
  * @param  {Array|Buffer} salt         Used for salting in the algorithm.
  * @param  {Number}       iterations   How many hashing iterations to run.
+ * @param  {Any}          err          A custom error to throw if verification _breaks_.
  *
  * @return {Promise}      Resolves with a boolean. True if the password was
  *                        able to be verified or false if not.
  */
-export function verifyPassword(password, hashToMatch, salt, iterations) {
+export function verifyPassword(password, hashToMatch, salt, iterations, err) {
   return new Promise((resolve, reject) => {
     createHash(password, salt, iterations)
       .then(resultingHash => resultingHash === hashToMatch ? resolve(true) : resolve(false))
-      .catch(err => reject(err))
+      .catch(e => reject(typeof err !== 'undefined' ? err : e))
   });
 }

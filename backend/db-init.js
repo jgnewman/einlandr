@@ -1,13 +1,14 @@
 import Sequelize from 'sequelize';
+import reduce from 'reduquelize';
 import { log, colors } from 'gulp-util';
 import defineModels from './db-models';
-import defineQueries from './db-queries';
+import defineInterface from './db-interface';
 import config from '../config';
 
 const connectHooks = [];
 let connected = false;
 let connecting = false;
-let db, models, queries;
+let db;
 
 function generateDBErr(err) {
   return ` Unable to connect to the database:
@@ -75,10 +76,10 @@ function dbConnect() {
       log(colors.yellow('Database connection established'));
       connected = true;
       connecting = false;
-      db = tempDB;
-      models = defineModels(tempDB);
-      queries = defineQueries(tempDB, models);
-      connectHooks.forEach(hook => hook(queries, models, tempDB));
+
+      defineModels(tempDB);
+      db = defineInterface(reduce(tempDB));
+      connectHooks.forEach(hook => hook(db));
     });
 
     authenticated.catch(err => {
@@ -107,7 +108,7 @@ export default function dbReady(hook) {
   if (config.backend.dbEnabled) {
 
     // If we're already connected, execute hook.
-    connected && hook && hook(queries, models, db);
+    connected && hook && hook(db);
 
     // Otherwise, push the hook into the queue.
     !connected && hook && connectHooks.push(hook);

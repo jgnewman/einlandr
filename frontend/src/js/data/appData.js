@@ -7,25 +7,6 @@ export function foo(sessionId, userId, userData) {
 }
 
 // EXAMPLE
-// Authenticate via websocket, returning a promise
-// const socket = brightsocket();
-//
-// export function socketAuth(credentials) {
-//   return new Promise((resolve, reject) => {
-//     socket.connect('AUTHENTICATION', credentials, () => {
-//       socket.receive('AUTHENTICATED', data => {
-//         socket.connect('AUTHENTICATED', data, () => resolve(data))
-//       });
-//       socket.receive('UNAUTHORIZED', () => reject());
-//     });
-//   });
-// }
-//
-// After authenticating, all of your messages passed to the socket
-// should contain a sessionId property as returned in the authentication data.
-
-
-// EXAMPLE
 // Authenticate via ajax, returning a promise
 //
 // export function ajaxAuth(credentials) {
@@ -43,3 +24,21 @@ export function foo(sessionId, userId, userData) {
 //     { headers: { Authorization: `Basic ${sessionId}` } }
 //   );
 // }
+
+// EXAMPLE
+// Authenticate via websocket, returning a promise
+// const socket = brightsocket();
+//
+// export function socketAuth(credentials) {
+//   return new Promise((resolve, reject) => {
+//     socket.connect('AUTHENTICATION', credentials, () => {
+//       socket.receive('AUTHENTICATED', data => {
+//         socket.connect('AUTHENTICATED', data, () => resolve(data))
+//       });
+//       socket.receive('UNAUTHORIZED', () => reject());
+//     });
+//   });
+// }
+//
+// After authenticating, all of your messages passed to the socket
+// should contain a sessionId property as returned in the authentication data.

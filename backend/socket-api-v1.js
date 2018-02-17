@@ -1,62 +1,41 @@
-import { validateSession, generateSession } from './server-auth';
 import { log, colors } from 'gulp-util';
 
-
-export default function attachSocketAPI(socketServer, queries) {
+export default function attachSocketAPI(socketServer, { Users, Sessions }) {
 
   // Users will connect to the AUTHENTICATION channel and pass us a
   // username and password.
-  socketServer.connect('AUTHENTICATION', (connection, identity) => {
+  socketServer.connect('AUTHENTICATION', async(connection, identity) => {
     log('User requesting authentication...', identity.email);
 
-    // We'll attempt to authenticate the identity.
-    queries.authUser(identity.email, identity.password)
+    try {
+      const user = await Users.authenticate(identity.email, identity.password);
 
-         // In the event of a successful authentication,
-         // make sure we have a real result. If so, create
-         // a new session.
-         .then(result => {
-           if (result) {
-             const creator = generateSession(result, queries.createSession, queries.suppressSession);
-             delete result.password;
+      if (!user || user.isNull()) {
+        log(colors.red('Failed to authorize user.'));
+        return connection.send('UNAUTHORIZED', {
+          responseTo: 'AUTHENTICATION:connect'
+        });
+      }
 
-             // When the new session is made, send back AUTHENTICATED and
-             // tell the user to reconnect to the AUTHENTICATED channel.
-             creator.then(token => {
-               log('User was authenticated:', identity.email);
-               connection.send('AUTHENTICATED', {
-                 sessionId: token,
-                 user: result,
-                 reconnect: 'AUTHENTICATED'
-               });
-             });
+      const session = await Sessions.start(user);
+      delete user.password;
+      delete user.pwdSalt;
+      delete user.pwdIterations;
 
-             // If we couldn't create a session. That's an error.
-             creator.catch(err => {
-               log(colors.red(err));
-               connection.send('SERVER_ERROR', {
-                 error: err,
-                 responseTo: 'AUTHENTICATION:connect'
-               });
-             });
+      log('User was authenticated:', identity.email);
+      connection.send('AUTHENTICATED', {
+        sessionId: session.id,
+        user: user.raw(),
+        reconnect: 'AUTHENTICATED'
+      });
 
-           // If we don't have a real result, the user is still UNAUTHORIZED.
-           } else {
-             log(colors.red('Failed to authorize user.'));
-             connection.send('UNAUTHORIZED', {
-               responseTo: 'AUTHENTICATION:connect'
-             });
-           }
-         })
+    } catch (err) {
+      log(colors.blue(err));
+      connection.send('SERVER_ERROR', {
+        responseTo: 'AUTHENTICATION:connect'
+      });
+    }
 
-         // In the event of a failed authentication
-         // we'll send back UNAUTHORIZED.
-         .catch(err => {
-           log(colors.blue(err));
-           connection.send('UNAUTHORIZED', {
-             responseTo: 'AUTHENTICATION:connect'
-           });
-         });
   });
 
   // Authenticated users will connect to the AUTHENTICATED channel
@@ -68,17 +47,15 @@ export default function attachSocketAPI(socketServer, queries) {
     // For each one, we'll expect the sessionId to be included.
     // If we can validate the session, we'll allow the action through.
     // If we can't, we'll filter it out and tell the user they're UNAUTHORIZED.
-    connection.addFilter((action, payload, next) => {
-      const validator = validateSession(
-        payload.sessionId,
-        queries.readSession,
-        queries.updateSession,
-        queries.deleteSession
-      );
-      validator.then(() => next());
-      validator.catch(() => connection.send('UNAUTHORIZED', {
-        responseTo: `AUTHENTICATED:${action}`
-      }));
+    connection.addFilter(async(action, payload, next) => {
+      try {
+        await Sessions.validate(payload.sessionId);
+        return next();
+      } catch (_) {
+        connection.send('UNAUTHORIZED', {
+          responseTo: `AUTHENTICATED:${action}`
+        })
+      }
     });
 
     /*******************************************
@@ -86,13 +63,20 @@ export default function attachSocketAPI(socketServer, queries) {
      *******************************************/
 
     // Example.
-    // connection.receive('GET_USER', payload => {
-    //   queries.readUser(payload.userId)
-    //          .then(result => connection.send('USER_RECORD', result))
-    //          .catch(result => connection.send('NOT_FOUND', {
-    //            responseTo: 'AUTHENTICATED:GET_USER'
-    //          }));
-    // });
+    // connection.receive('GET_USER', async(payload) => {
+    //   const user = await Users.get(payload.userId)
+    //
+    //   if (!user || user.isNull()) return connection.send('NOT_FOUND', {
+    //     responseTo: 'AUTHENTICATED:GET_USER'
+    //   })
+    //
+    //   return connection.send('USER_RECORD', user.raw(
+    //     'id',
+    //     'firstName',
+    //     'lastName',
+    //     'email'
+    //   ))
+    // })
 
   });
 

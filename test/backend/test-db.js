@@ -2,7 +2,6 @@ import assert from 'assert';
 import { log } from 'gulp-util';
 import dbReady from '../../backend/db-init';
 import config from '../../config';
-import { generateSession, validateSession } from '../../backend/server-auth';
 import promiser from 'stateful-promise';
 
 const passwordVals = {
@@ -37,79 +36,10 @@ describe('Database', function () {
       dbReady(() => assert.ok(true));
     });
 
-    it('should be handed the correct 3 arguments', function (done) {
-      dbReady((queries, models, db) => {
-        assert.ok(queries.readUser);
-        assert.ok(models.User);
-        assert.equal(db.constructor.name, 'Sequelize');
+    it('should be handed the db', function (done) {
+      dbReady(db => {
+        assert.ok(db);
         done();
-      });
-    });
-
-  });
-
-  describe('CRUD Operations', function () {
-    let createdUserId;
-
-    it('should create a record', function (done) {
-      dbReady(queries => {
-        queries.createUser(Object.assign({}, {
-          firstName: 'Test',
-          lastName: 'User',
-          email: 'testuser@testuser.com'
-        }, passwordVals))
-        .then(user => {
-          assert.ok(user);
-          createdUserId = user.id;
-          done();
-        });
-      });
-    });
-
-    it('should read a single record', function (done) {
-      dbReady(queries => {
-        queries.readUser(createdUserId).then(user => {
-          assert.equal(user.id, createdUserId);
-          done();
-        });
-      });
-    });
-
-    it('should read many records', function (done) {
-      dbReady(queries => {
-        queries.readAllUser({ email: 'testuser@testuser.com' }).then(userList => {
-          assert.equal(userList.length, 1);
-          done();
-        });
-      });
-    });
-
-    it('should remove password field from a read record', function (done) {
-      dbReady(queries => {
-        queries.readUser(createdUserId).then(user => {
-          assert.equal(user.password, undefined);
-          done();
-        });
-      });
-    });
-
-    it('should update a record', function (done) {
-      dbReady(queries => {
-        queries.updateUser(createdUserId, { firstName: 'Updated' }).then(() => {
-          queries.readUser(createdUserId).then(user => {
-            assert.equal(user.firstName, 'Updated');
-            done();
-          });
-        });
-      });
-    });
-
-    it('should delete a record', function (done) {
-      dbReady(queries => {
-        queries.deleteUser(createdUserId).then(amountRemoved => {
-          assert.equal(amountRemoved, 1);
-          done();
-        });
       });
     });
 
@@ -121,9 +51,9 @@ describe('Database', function () {
     let createdSessionExpires;
 
     it('should create a session', function (done) {
-      dbReady(queries => {
+      dbReady(({ Users, Sessions }) => {
 
-        queries.createUser(Object.assign({}, {
+        Users.saveCreate(Object.assign({}, {
           firstName: 'Test',
           lastName: 'User',
           email: 'testuser@testuser.com'
@@ -131,17 +61,14 @@ describe('Database', function () {
         .then(user => {
           createdUserId = user.id;
           config.backend.sessionSuppression = 0;
-          generateSession(
-            user,
-            queries.createSession,
-            queries.suppressSession
-          ).then(session => {
+
+          Sessions.start(user).then(session => {
             createdSessionId = session.id;
             createdSessionExpires = session.expiresAt;
             config.backend.sessionSuppression = origSuppression;
             assert.ok(session.id);
             assert.ok(session.expiresAt);
-            queries.deleteUser(createdUserId).then(() => {
+            user.destroy().then(() => {
               done();
             });
           });
@@ -151,17 +78,11 @@ describe('Database', function () {
     });
 
     it('should validate/update a session', function (done) {
-      dbReady(queries => {
-
-        validateSession(
-          createdSessionId,
-          queries.readSession,
-          queries.updateSession,
-          queries.deleteSession
-        ).then(session => {
+      dbReady(({ Sessions }) => {
+        Sessions.validate(createdSessionId).then(session => {
           assert.equal(session.id, createdSessionId);
           assert.notEqual(session.expiresAt, createdSessionExpires);
-          queries.deleteSession(createdSessionId).then(() => {
+          session.destroy().then(() => {
             done();
           });
         });
@@ -170,35 +91,29 @@ describe('Database', function () {
     });
 
     it('should delete an invalid session', function (done) {
-      dbReady(queries => {
+      dbReady(({ Sessions, Users }) => {
 
-        queries.createUser(Object.assign({}, {
+        Users.saveCreate(Object.assign({}, {
           firstName: 'Test',
           lastName: 'User',
           email: 'testuser@testuser.com'
         }, passwordVals)).then(user => {
           createdUserId = user.id;
           config.backend.sessionSuppression = 0;
-          generateSession(
-            user,
-            queries.createSession,
-            queries.suppressSession
-          ).then(session => {
+
+          Sessions.start(user).then(session => {
             const now = new Date();
             now.setHours(now.getHours() - 1000);
             createdSessionId = session.id;
             createdSessionExpires = session.expiresAt;
             config.backend.sessionSuppression = origSuppression;
-            queries.updateSession(session.id, { expiresAt: now }).then(updated => {
-              validateSession(
-                session.id,
-                queries.readSession,
-                queries.updateSession,
-                queries.deleteSession
-              ).catch(() => {
-                queries.deleteUser(createdUserId).then(() => {
-                  queries.readSession(session.id).then(nothing => {
-                    assert.equal(nothing, null);
+            session.expiresAt = now;
+
+            session.save().then(updated => {
+              Sessions.validate(session.id).catch(() => {
+                Users.destroy(createdUserId).then(() => {
+                  Sessions.get(session.id).then(nothing => {
+                    assert.equal(nothing.isNull(), true);
                     done();
                   });
                 });
@@ -211,7 +126,7 @@ describe('Database', function () {
     });
 
     it('should suppress dead sessions', function (done) {
-      dbReady(queries => {
+      dbReady(({ Sessions, Users }) => {
         const now = new Date();
 
         // We'll use this date to artificially expire some sessions
@@ -224,7 +139,7 @@ describe('Database', function () {
         .then(state => {
           const userList = [];
           return state.set('userList', promiser.recur((next, resolve, reject) => {
-            queries.createUser(Object.assign({}, {
+            Users.saveCreate(Object.assign({}, {
               firstName: 'Test',
               lastName: 'User',
               email: Math.random() + '@testuser.com'
@@ -241,12 +156,7 @@ describe('Database', function () {
         .then(state => {
           const sessionList = [];
           return state.set('sessionList', promiser.recur((next, resolve, reject) => {
-            generateSession(
-              state.userList[sessionList.length],
-              queries.createSession,
-              queries.suppressSession
-            )
-            .then(session => {
+            Sessions.start(state.userList[sessionList.length]).then(session => {
               sessionList.push(session);
               sessionList.length === 3 ? resolve(sessionList) : next();
             })
@@ -257,14 +167,15 @@ describe('Database', function () {
         // Expire all 3 sessions
         .then(state => {
           return state.map('sessionList', session => {
-            return queries.updateSession(session.id, { expiresAt: now });
+            session.expiresAt = now;
+            return session.save();
           })
         })
 
         // Add a 4th user
         .then(state => {
           config.backend.sessionSuppression = 2;
-          return state.setTo(state.userList, 3, queries.createUser(Object.assign({}, {
+          return state.setTo(state.userList, 3, Users.saveCreate(Object.assign({}, {
             firstName: 'Test',
             lastName: 'User',
             email: Math.random() + '@testuser.com'
@@ -274,16 +185,18 @@ describe('Database', function () {
         // Add a 4th session. The idea is that this should remove
         // 2 of our pre-created sessions from the db automatically.
         .then(state => {
-          return state.setTo(state.sessionList, 3, generateSession(
-            state.userList[3],
-            queries.createSession,
-            queries.suppressSession
-          ))
+          return state.setTo(state.sessionList, 3, Sessions.start(state.userList[3]))
         })
 
-        // Read in all sessions that expired at the date we previously set
+        // Read in all sessions that expired at the date we previously set.
+        // Suppression is async so give it a second to complete
         .then(state => {
-          return state.set('expiredSessions', queries.readAllSession({ expiresAt: now }))
+          return new Promise(resolve => {
+            setTimeout(() => {
+              const prom = state.set('expiredSessions', Sessions.getMany({ expiresAt: now }));
+              resolve(prom);
+            }, 1000);
+          })
         })
 
         // Execute our assertion.
@@ -296,14 +209,14 @@ describe('Database', function () {
         // Cleanup users
         .then(state => {
           return state.forEach('userList', user => {
-            return queries.deleteUser(user.id);
+            return user.destroy();
           })
         })
 
         // Cleanup sessions
         .then(state => {
           return state.forEach('sessionList', session => {
-            return queries.deleteSession(session.id);
+            return session.destroy();
           })
         })
 
@@ -313,11 +226,14 @@ describe('Database', function () {
     }); // it should
 
 
-
   });
 
   /***************************************
    * Describe more tests here
    ***************************************/
+
+  after(function () {
+    dbReady(db => db.getSQConnection().close());
+  });
 
 });

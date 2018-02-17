@@ -1,39 +1,11 @@
-- [x] Create app skeleton
-  - [x] React router
-  - [x] App container
-  - [x] React redux
-  - [x] Reducer
-  - [x] Initial state
-  - [x] Actions
-  - [x] Data
-  - [x] Localstorage persistence
-- [x] add bodyparser to express routes
-- [x] http Authentication
-- [x] Websocket setup
-- [x] Websocket authentication
-- [x] Write example authentication into the frontend
-- [x] DB setup
-- [x] DB api
-- [x] use ngrok
-- [x] useful scss
-- [x] automate adding a new app layer
-- [x] Browser refresh for dev env
-- [x] add nice index file stuff
-- [x] Move hardcoded gulp locations to config
-- [x] Make sure we correctly choose a prod/dev port
-- [x] New command for generating individual components
-- [x] Add something like node-schedule to clean up unused sessions
-- [x] expire sessions should find all sessions where created_at is 12 hr less than now
-- [x] Document schedules
-- [x] Useful middlewares?
-- [x] de-arrayify update results
-- [x] make sure sessions expire
-- [x] change the expire schedule to work with new expire methodology
-- [x] schedules redundantly run on server reload. fix this
-- [x] Finish documenting + testing all db API fns
-- [x] Add in session suppression
-- [x] More stable promise Handling
-- [x] Hash and salt passwords automatically
-- [ ] Reduquelize
-- [ ] remove stateful promise?
-- [ ] More unit tests
+- [ ] Create a tool for abstracting data calls on frontend. For example,
+class Users extends REST {
+  constructor(token) {
+    super(token);
+  }
+
+  getAdults()
+}
+
+const users = new Users('asdfasdf').base('/api/v1/users')
+await users.get(id)

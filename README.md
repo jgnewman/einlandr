@@ -1,6 +1,6 @@
 # Einlandr
 
-Einlandr is a robust bootstrapping environment for React apps running on Node servers with Postgres databases that runs on Yarn.
+Einlandr is a robust bootstrapping environment for React apps running on Node servers with Postgres databases powered by on Yarn.
 
 Jump to...
 
@@ -25,7 +25,7 @@ Jump to...
 
 On the front end:
 
-- ES6
+- ES201x
 - A clean, ready-made application architecture following the container/presentational pattern, great for managing...
   - containers
   - components
@@ -48,7 +48,7 @@ On the front end:
 
 On the back end:
 
-- ES6
+- ES201x
 - Gulp + Express
 - A configurable nature
 - Env variables for both prod vs dev environments
@@ -104,9 +104,9 @@ export NODE_ENV=production
 export DATABASE_SECRET="Pirates always fight with cutlasses"
 ```
 
-Everything you do with Einlandr is run through Yarn commands. These commands will source these files as appropriate, making them available throughout your server environment. That said, the expected workflow is that the config file should adjust itself based on these variables, then the rest of the server uses the config file. As you add new layers to your application that require environment variables, you will want to store those in these files and then make corresponding config values.
+Everything you do with Einlandr is run through Yarn commands. These commands will source the environment files as appropriate, making them available to every file on the server. That said, the expected workflow is that the config file should adjust itself based on these variables, then the rest of the server uses the config file. As you add new layers to your application that require environment variables, you will want to store those in these files and then create corresponding config values.
 
-Note that these are just example values. You can change them as needed.
+Note that these are just example values. You should change them as needed.
 
 ## Using a database
 
@@ -114,13 +114,13 @@ Note that these are just example values. You can change them as needed.
 
 Einlandr is optimized for Postgres. You can switch this out for something else if you'd like but I wouldn't recommend it unless you are intimately familiar with all of the Einlandr source code. A lot of things are bootstrapped for you and they assume a Postgres database.
 
-To set up a local database, make sure you have Postgres installed and some method of looking inside your database to make sure everything is working. If you're a visual person and are using a Mac, I highly recommend [Postico](https://eggerapps.at/postico/).
+To set up a local database, make sure you have Postgres installed and some method of looking inside your database to make sure everything is working. If you're a visual person and are using a Mac, I highly recommend [Postico](https://eggerapps.at/postico/). Otherwise, [pgAdmin](https://www.pgadmin.org) is a great alternative.
 
-Einlandr can't actually create a database for you so you'll need to do this yourself. I'll have to assume you already know how to create databases. With Postico, hit "connect", click "localhost" at the top, then click the "+ Database" button at the bottom. Give your database a name.
+Einlandr can't actually create a database for you so you'll need to do this yourself. Creating databases is extremely easy with either of the previously mentioned tools.
 
 ### Configuration
 
-Once you've created a database and named it, you'll need to plug that name into your env-dev file for the `DATABASE_DEV_NAME` key. Also make sure you choose a `DATABASE_SECRET` to go along with certain database-related actions.
+Once you've created a database and named it, you'll need to plug that name into your env-dev file for the `DATABASE_DEV_NAME` key. Also make sure you choose a `DATABASE_PASSWORD` and/or `DATABASE_SECRET` as necessary.
 
 Open up config.js, find the `backend` object, and make sure you set `dbEnabled` to true. Notice how other database values are pulled in from the environment. You'll want to follow this pattern when adding new configuration options.
 
@@ -132,20 +132,22 @@ postgres://axjxocwjzztraf:6f8b8351f2f87b26e50fa06210d7cbf1474567891dbdde5abb6444
 
 ### Seeding
 
-In order to create a database scheme, Einlandr uses [Sequelize](http://docs.sequelizejs.com/en/v3/). If you open backend/db-models.js you will see that the first two ORM models have been created for you, namely Users and Sessions. These two models are necessary for Einlandr's built-in authentication to work properly so I'd recommend against deleting them, although you can feel free to modify the Users model to your heart's content as long as you leave email and password intact.
+In order to create a database schema, Einlandr uses [Sequelize](http://docs.sequelizejs.com/en/v3/) with a [Reduquelize](https://www.npmjs.com/package/reduquelize) layer to simplify things.
+
+If you open backend/db-models.js you will see that the first two ORM models have been created for you, namely Users and Sessions. These two models are necessary for Einlandr's built-in authentication to work properly so I'd recommend against deleting them, although you can feel free to modify the Users model to your heart's content as long as you leave email and password-related fields intact.
 
 Define all the additional models you'd like in the area labeled "Define your models here". This will allow Sequelize to set up all of the necessary tables and relations for you.
 
-Next, open up backend/db-seed.js and look for the area labeled as "Create your data here". Just above this line you will see two examples of users that will be seeded into the database whenever you run your seed script. Feel free to copy/paste this pattern in order to easily add new seed data:
+Next, open up backend/db-seed.js and look for the area labeled "Create your data here". Just above this line you will see two examples of users that will be seeded into the database whenever you run your seed script. Feel free to copy/paste this pattern in order to easily add new seed data:
 
 ```javascript
-// Create a new User with these values
-.then(() => create(models.User, {
+// Create a new User with values like these
+await create(Users, {
   firstName: 'John',
   lastName: 'Doe',
   email: 'fake@fake.com',
   password: 'asdf;laksjdf'
-}, 'Created user John Doe')) // Useful console output on creation success
+}, 'Created user John Doe') // Useful console output on creation success
 ```
 
 The seed command is `yarn dev:seed` for development environments or `yarn prod:seed` for production environments. Remember that the only difference between these two commands is which set of envionment variables it uses and how it connects to your database.
@@ -154,39 +156,26 @@ The seed command is `yarn dev:seed` for development environments or `yarn prod:s
 
 ### Defining an API
 
-In order to make using the http API and websocket API easy, you'll want to simplify how these layers access your database. Sequelize can often be verbose and it's good to put a layer of abstraction over it for some of your more complicated queries.
+In order to make using the http API and websocket API easy, you'll want to simplify how these layers access your database. Sequelize can often be verbose so Einlandr includes a Reduquelize layer.
 
-To do that, open up the file backend/db-queries.js and locate the area labeled "Define the rest of your queries here". Follow the pattern you see below for the `authUser` function. Note that `create<ModelName>, read<ModelName>, update<ModelName>, delete<ModelName>` functions have automatically been created for each of your models. To learn more about them, checkout [their documentation](./db-queries.md).
+Reduquelize generates a simplified model for each of your tables, containing methods like `get`, `getOne`, `getMany`, `create`, `saveCreate`, `update`, `updateMany`, `destroy`, `destroyMany`, and `count`. You can also call the `augment` function to add new, more robust methods to these models.
+
+To do that, open up the file backend/db-interface.js and locate the area labeled "Augment your models here". Follow the pattern you see below that area to see how the Users and Sessions models have been augmented to facilitate authentication.
+
+Here is an example for how you might augment a Users model to find all adult users:
 
 ```javascript
-// Create a query called authUser.
-// It takes an email string and a password string.
-queries.authUser = (email, password) => {
+Users.augment({
 
-  // Use sequelize to locate a user record where
-  // the username/password values match.
-  const promise = models.User.findOne({
-    where: { email: email, password: password }
-  });
+  getAdults: async() => {
+    const users = await Users.getMany({ age: { $gte: 18 } })
+    return users;
+  }
 
-  // If there's a problem, log that to the console.
-  promise.catch(err => log(colors.red(err)));
-
-  // Log a successful result to the console as well.
-  promise.then(result => {
-    result ? log(colors.green(`Found user with matching email & password.`))
-           : log(colors.blue(`Could not find user with matching email & password.`));
-  });
-
-  // Return a promise. When it resolves with the user
-  // record, `simplify` will cut the password
-  // value out of it so that doesn't accidentally make it
-  // out to the client side.
-  return simplify(promise);
-};
+})
 ```
 
-You will have the database queries available to you when defining both your http API and your websocket API.
+You will have these models available to you when defining both your http API and your websocket API.
 
 ## Exposing a dev app to the internet
 
@@ -210,15 +199,15 @@ Note that static assets are already configured for you in the file server-middle
 
 ## Configuring server middleware
 
-As stated above, Einlandr uses [Express](https://expressjs.com/) for the http server. If you'd like to add middleware to http requests to your server app, you can do that in backend/server-middlewares.js.
+As stated above, Einlandr uses [Express](https://expressjs.com/) for the http server. If you'd like to add middleware to http requests on your server app, you can do that in backend/server-middlewares.js.
 
-Within this file, you'll see that lots of yummy middleware is already being applied. To add more, find the area labeled "Attach your custom middleware here" and add in all the calls to `app.use` that you want.
+Within this file, you'll see that lots of cool middleware is already being applied (including request body parsing, authentication checks, and CORS stuff). To add more, find the area labeled "Attach your custom middleware here" and add in all the calls to `app.use` that you want.
 
 ## Scheduling jobs
 
 Einlandr comes packaged with a built-in scheduler using [node-schedule](https://www.npmjs.com/package/node-schedule). To create a scheduled job, simply add a new file to the "backend/schedules" directory. When the server starts up, each file in this directory will be launched in a child_process so that when jobs run, they won't block events on the main thread.
 
-In order to user node-schedule you may want to be familiar with cron format. However, there are plenty of more semantic ways to schedule jobs though none are quite as concise.
+In order to use node-schedule you may want to be familiar with the cron format. However, there are plenty of more semantic ways to schedule jobs though none are quite as concise.
 
 Here is an example of a scheduled job that will run once every minute. Feel free to try it out.
 
@@ -231,13 +220,14 @@ import schedule from 'node-schedule';
 import dbReady from '../backend/db-init';
 
 // Establish a database connection
-dbReady(queries => {
+dbReady(({ Users }) => {
 
   // Schedule a job to run every minute
-  schedule.scheduleJob('0 * * * * *', () => {
+  schedule.scheduleJob('0 * * * * *', async() => {
 
     // Read the first user from the database and log it
-    queries.readUser(1).then(user => console.log(user));
+    const user = await Users.get(1);
+    console.log(user.raw());
   });
 });
 ```
@@ -248,22 +238,25 @@ Note that the above script will only be able to log out data if you have already
 
 Einlandr starts you off with a minimally bootstrapped http API. If your app does not use a database, this will be both useless and unavailable to you.
 
-To define your API, open the file backend/http-adpi-v1.js and locate the area labeled "Add more API routes here". Because Einlandr uses [Express](https://expressjs.com/) for the http server, API routes will be added with calls to `app.get, app.post, etc`.
+To define your API, open the file backend/http-api-v1.js and locate the area labeled "Add more API routes here". Because Einlandr uses [Express](https://expressjs.com/) for the http server, API routes will be added with calls to `app.get, app.post, etc`.
 
 Notice that 3 routes have already been created for you: one for logging in, one for logging out (more on authentication later), and one for getting a user record. Follow the pattern seen in these functions to create routes of your own:
 
 ```javascript
 // When a request attempts to get a user by id...
-app.get('/api/v1/users/:id', (req, res) => {
+app.get('/api/v1/users/:id', async(req, res) => {
 
-  // Call readUser from the db api.
-  queries.readUser(req.params.id)
+  // Find the user in the database
+  const user = await Users.get(req.params.id);
 
-         // If we got a result, send it back out.
-         .then(result => { res.send(result) })
+  // Handle the case where we don't find the user
+  if (user.isNull()) return res.sendStatus(404);
 
-         // If something went wrong, send a 404 instead.
-         .catch(() => { res.sendStatus(404) });
+  // Be sure not to include sensitive data then
+  // send back the user info.
+  delete user.password;
+  res.send(user.raw());
+
 });
 ```
 
@@ -279,29 +272,25 @@ axios.get('/api/v1/users/1')
 
 ## Using the websocket API
 
-Einlandr uses [Brightsocket.io](https://www.npmjs.com/package/brightsocket.io), a lesser-known but rather cool that sits on top of Socket.io for managing websocket APIs.
+Einlandr uses [Brightsocket.io](https://www.npmjs.com/package/brightsocket.io), a lesser-known but rather cool library that sits on top of Socket.io for managing websocket APIs.
 
 If you open up backend/socket-api-v1.js, you'll find 2 areas prepared for you to start writing code. The first is labeled "Add additional action handlers here" and the second is labeled "Add additional websocket channels here".
 
 The first area is where you can describe API events for authenticated users (more on authentication later). The second area is where you can start doing more advanced things with Brightsocket.io once you get how it works.
 
-Within the first area, an example of how you might write an API call using websockets has been written for you:
+Within the first area, an example of how you might write an API call using websockets has been written for you. Here's a simplified version of what's going on there:
 
 ```javascript
 // When an authenticated user sends the GET_USER action,
 // we'll expect the payload to have a userId property.
-connection.receive('GET_USER', payload => {
+connection.receive('GET_USER', async(payload) => {
 
-  // Use the database queries to read a user by id.
-  queries.readUser(payload.userId)
+  const user = await Users.get(payload.userId);
 
-         // If it's successful, send the result to the user as
-         // a USER_RECORD action. The client side should listen for
-         // this action and handle the result when it comes in.
-         .then(result => connection.send('USER_RECORD', result))
+  if (user.isNull()) return connection.send('NOT_FOUND');
 
-         // If it didn't work, send the NOT_FOUND action instead.
-         .catch(result => connection.send('NOT_FOUND'));
+  delete user.password;
+  return connection.send('USER_RECORD', user);
 });
 ```
 
@@ -312,7 +301,7 @@ Einlandr comes with a built-in method for authentication using json web tokens. 
 
 ### Database schema
 
-In backend/db-models.js, a User model and a Session model have already been created. Users are expected to have an email address and password to match against for authentication.
+In backend/db-models.js, a user model and a session model have already been created with Sequelize. Users are expected to have an email address and password to match against for authentication.
 
 > Note that raw passwords are not saved in the database. Passwords are encrypted via PBKDF2 with HMAC-SHA-512 as a core hashing algorithm and using a randomly generated 16 byte salt at 100,000 iterations.
 
@@ -423,9 +412,9 @@ The `AUTHENTICATION` channel uses the database API to try to authenticate users 
 
 In any other case, the server will send back "UNAUTHORIZED" or "SERVER_ERROR" depending on what went wrong.
 
-Once authenticated, it's time for the connection to reconnect to the `AUTHENTICATED` channel. You'll notice that this channel has a call to `addFilter` in it, which is essentially middleware for Brightsocket.io. Any connection who can pass the test imposed by the filter will be allowed access to the rest of the API defined within this channel. Otherwise, it will be send "UNAUTHORIZED".
+Once authenticated, it's time for the connection to reconnect to the `AUTHENTICATED` channel. You'll notice that this channel has a call to `addFilter` in it, which is essentially middleware for Brightsocket.io. Any connection that can pass the test imposed by the filter will be allowed access to the rest of the API defined within this channel. Otherwise, it will be sent "UNAUTHORIZED".
 
-Specifically, this channel demands that every time data comes in through a connection (including when the actual connection occurs) that the payload include a `sessionId` key containing a valid session token. If it does, it will be able to access the websocket events you have set up within this channel.
+Specifically, this channel demands that every time data comes in through a connection (including when the actual connection occurs) that the payload should include a `sessionId` key containing a valid session token. If it does, it will be able to access the websocket events you have set up within this channel.
 
 On the client side, you can authenticate using a method like this:
 
@@ -466,9 +455,9 @@ Then entire front end of the application lives in the "frontend" directory. As y
 
 ### Which files should be left alone
 
-You'll want to ignore the entire frontend/css directory. It is exclusively used by the build process and will get wiped clean with every build. Instead, you'll define your styles using scss in the frontend/src/scss directory.
+You'll want to ignore the entire frontend/css directory. It is exclusively used by the build process and will get wiped clean with every build. To define your styles, you will use scss in the frontend/src/scss directory.
 
-You'll also want to ignore frontend/index.html. This file is modified by the build process in that it changes depending upon whether you're in a development or production environment. If you want to modify change this file, you'll need to edit frontend/src/templates/index.html instead.
+You'll also want to ignore frontend/index.html. This file is modified by the build process in that it changes depending upon whether you're in a development or production environment. If you want to modify this file, you'll need to edit frontend/src/templates/index.html instead.
 
 Fonts and images are just static files and Einlandr doesn't do anything with them. As such, feel free to put your fonts and images directly into frontend/fonts and frontend/img. You can also modify frontend/favicon.ico at will. Einlandr won't mess with it.
 
