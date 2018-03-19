@@ -303,7 +303,7 @@ Einlandr comes with a built-in method for authentication using json web tokens. 
 
 In backend/db-models.js, a user model and a session model have already been created with Sequelize. Users are expected to have an email address and password to match against for authentication.
 
-> Note that raw passwords are not saved in the database. Passwords are encrypted via PBKDF2 with HMAC-SHA-512 as a core hashing algorithm and using a randomly generated 16 byte salt at 100,000 iterations.
+> Note that raw passwords are not saved in the database. Passwords are encrypted via PBKDF2 with HMAC-SHA-512 as a core hashing algorithm and using a randomly generated 16 byte salt at 100,000 iterations. Passwords are automatically limited to 1000 characters to avoid large password DDOS attacks.
 
 When a user is authenticated, a session will be created in the sessions table.
 

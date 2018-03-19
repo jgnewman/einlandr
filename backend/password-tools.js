@@ -12,6 +12,9 @@
 import secureRandom from 'secure-random';
 import { pbkdf2 } from 'crypto';
 
+const PWD_ITERATIONS = 100000;
+const MAX_PWD_SIZE = 1000;
+
 
 function createSalt() {
   return secureRandom(16);
@@ -20,9 +23,11 @@ function createSalt() {
 function createHash(password, salt, iterations) {
   salt = salt instanceof Buffer ? salt : Buffer(salt);
   return new Promise((resolve, reject) => {
-    pbkdf2(password, salt, iterations, 512, 'sha512', (err, key) => {
-      err ? reject(err) : resolve(key.toString('hex'));
-    })
+    password.length > MAX_PWD_SIZE
+      ? reject('Password exceeds max length')
+      : pbkdf2(password, salt, iterations, 512, 'sha512', (err, key) => {
+          err ? reject(err) : resolve(key.toString('hex'));
+        })
   })
 }
 
@@ -39,8 +44,8 @@ function createHash(password, salt, iterations) {
 export function createHashAndSalt(password) {
   return new Promise((resolve, reject) => {
     const salt = createSalt();
-    createHash(password, salt, 100000)
-      .then(hash => resolve({ hash: hash, salt: salt, iterations: 100000 }))
+    createHash(password, salt, PWD_ITERATIONS)
+      .then(hash => resolve({ hash: hash, salt: salt, iterations: PWD_ITERATIONS }))
       .catch(err => reject(err))
   });
 }
