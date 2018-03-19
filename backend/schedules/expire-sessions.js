@@ -7,8 +7,8 @@ import config from '../../config';
  * Recurs as a cron job and cleans out invalid sessions
  * from the database. Frequency is set via config.backend.sessionCleanFrequency.
  */
-dbReady(async({ Sessions }) => {
-  schedule.scheduleJob(config.backend.sessionCleanFrequency, () => {
+dbReady(({ Sessions }) => {
+  schedule.scheduleJob(config.backend.sessionCleanFrequency, async() => {
     log(colors.yellow('Cleaning expired sessions...'));
 
     // Expire all sessions whose expiresAt field is less than now.
